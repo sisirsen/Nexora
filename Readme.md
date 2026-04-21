@@ -19,6 +19,57 @@ This project demonstrates strong understanding of React fundamentals, API integr
 *  Live API integratio
 *  Fully responsive (mobile + desktop)
 
+# Folder Structure 
+
+Voynex-web application
+│
+├── public/
+│   ├── favicon.ico
+│   ├── logo.png
+│   └── index.html
+│
+├── src/
+│   ├── assets/              # images, icons, logos
+│   │   ├── images/
+│   │   ├── icons/
+│   │   └── logos/
+│   │
+│   ├── components/          # reusable UI components
+│   │   ├── Navbar.jsx
+│   │   ├── Footer.jsx
+│   │   ├── CoinCard.jsx
+│   │   ├── Loader.jsx
+│   │   └── SearchBar.jsx
+│   │
+│   ├── pages/               # full pages (routes)
+│   │   ├── Home.jsx
+│   │   ├── CoinDetails.jsx
+│   │   ├── Market.jsx
+│   │   └── Watchlist.jsx
+│   │
+│   ├── services/            # API calls
+│   │   └── cryptoApi.js
+│   │
+│   ├── hooks/               # custom hooks
+│   │   └── useFetchCoins.js
+│   │
+│   ├── context/             # global state (important)
+│   │   └── CryptoContext.jsx
+│   │
+│   ├── utils/               # helper functions
+│   │   ├── formatCurrency.js
+│   │   └── debounce.js
+│   │
+│   ├── styles/              # Tailwind/global CSS
+│   │   └── index.css
+│   │
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── routes.jsx           # routing setup
+│
+├── .env                     # API keys (VERY IMPORTANT)
+├── package.json
+└── README.md
 
 # Tech Stack
 
