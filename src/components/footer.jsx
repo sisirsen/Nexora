@@ -8,7 +8,7 @@ const Footer = () => {
 
         {/* Brand */}
         <div>
-         <div className="flex items-center gap-4"><img className="h-10 w-12" src={icons.logo} alt="" srcset="" /> <h1 className="text-2xl font-bold text-orange-500">Voynex</h1></div>
+         <div className="flex items-center gap-4"><img className="h-10 w-10" src={icons.logo} alt="" srcset="" /> <h1 className="text-2xl font-bold text-orange-500">NEXORA</h1></div>
           <p className="mt-5 p- text-sm">
             <div className="text-md">
 
@@ -53,7 +53,7 @@ const Footer = () => {
 
       {/* Bottom */}
       <div className="border-t border-gray-800 text-center py-4 text-sm">
-        © 2026 Voynex. All rights reserved.
+        © 2026 NEXORA. All rights reserved.
       </div>
     </footer>
   );
