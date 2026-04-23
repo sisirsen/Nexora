@@ -18,7 +18,7 @@ function Navbar() {
       hover:after:w-full">Trade</li>
       <li className="relative inline-block cursor-pointer after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 after:bg-red-500 after:transition-all after:duration-300 
       hover:after:w-full">Contact</li>
-      <li className="relative inline-block cursor-pointer after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 after:bg-red-500 after:transition-all after:duration-300 
+      <li className="relative inline-block cursor-pointer  after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 after:bg-red-500 after:transition-all after:duration-300 
       hover:after:w-full">About Us</li>
       </div>
       <div className='flex'>
