@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+body{
+  background-color:black;
+  /* user-select: none; */
+}
+
+html {
+ scroll-behavior: smooth;
+}
+
+input:-webkit-autofill {
+  -webkit-text-fill-color: white;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+
