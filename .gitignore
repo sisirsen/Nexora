@@ -1,23 +1,4 @@
 # =========================
-# Python / Django
-# =========================
-
-Backend/env/
-Backend/venv/
-Backend/.venv/
-
-Backend/__pycache__/
-Backend/**/*.pyc
-
-# Django database
-Backend/db.sqlite3
-
-# Environment variables
-Backend/.env
-.env
-
-
-# =========================
 # React / Node
 # =========================
 

@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 function MarketCoins() {
   const [marketCoins, setMarketCoins] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState(" ");
   const [visibleCoins, setVisibleCoins] = useState(4);
   
 
