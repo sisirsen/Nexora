@@ -7,8 +7,7 @@ Nexora provides real-time cryptocurrency market data, detailed coin information,
 ## Live Demo
 
 
-
-> Frontend is currently deployed on Vercel.
+[Frontend is currently deployed on Vercel.](https://nexora-psi-gilt.vercel.app/)
 
 ## Overview
 
