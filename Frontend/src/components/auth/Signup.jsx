@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { FiEye, FiEyeOff, FiUser, FiMail, FiLock } from "react-icons/fi";
+import {
+  FiEye,
+  FiEyeOff,
+  FiUser,
+  FiMail,
+  FiLock,
+} from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
-import { FaFacebook } from "react-icons/fa";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { icon } from "../../assets/images";
@@ -35,18 +40,30 @@ function Signup() {
 
       password: Yup.string()
         .min(8, "Password must be at least 8 characters")
-        .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-        .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-        .matches(/[0-9]/, "Password must contain at least one number")
+        .matches(
+          /[A-Z]/,
+          "Password must contain at least one uppercase letter"
+        )
+        .matches(
+          /[a-z]/,
+          "Password must contain at least one lowercase letter"
+        )
+        .matches(
+          /[0-9]/,
+          "Password must contain at least one number"
+        )
         .required("Password is required"),
 
       confirmPassword: Yup.string()
-        .oneOf([Yup.ref("password")], "Passwords do not match")
+        .oneOf(
+          [Yup.ref("password")],
+          "Passwords do not match"
+        )
         .required("Please confirm your password"),
 
       terms: Yup.boolean().oneOf(
         [true],
-        "You must accept the Terms & Conditions",
+        "You must accept the Terms & Conditions"
       ),
     }),
 
@@ -56,7 +73,8 @@ function Signup() {
   });
 
   return (
-    <div className="min-h-[calc(100vh-88px)] bg-black text-white flex items-center justify-center px-4 py-20">
+    <div className="min-h-[calc(100vh-88px)] mt-16 sm:mt-20 bg-black text-white flex items-center justify-center px-4 py-6 sm:py-10">
+
       {/* ================= MAIN CARD ================= */}
 
       <div
@@ -69,43 +87,74 @@ function Signup() {
           overflow-hidden
           shadow-2xl
           flex
+          flex-col
+          md:flex-row
         "
       >
+
         {/* ================= LEFT SIDE ================= */}
 
-        <div className="w-1/2 px-10 py-7 flex flex-col justify-center">
+        <div
+          className="
+            w-full
+            md:w-1/2
+            px-5
+            sm:px-8
+            md:px-10
+            py-8
+            flex
+            flex-col
+            justify-center
+          "
+        >
+
           {/* LOGO */}
 
           <div className="flex items-center gap-3 mb-6">
+
             <div className="w-8 h-8 rounded-xl flex items-center justify-center">
-              <img src={icon.logo} alt="logo" />
+              <img
+                src={icon.logo}
+                alt="Nexora logo"
+                className="w-full h-full object-contain"
+              />
             </div>
 
-            <span className="text-xl font-bold">Nexora</span>
+            <span className="text-xl font-bold">
+              Nexora
+            </span>
+
           </div>
 
           {/* HEADING */}
 
           <div className="mb-5">
+
             <p className="text-red-500 text-sm font-semibold mb-1">
               Get started
             </p>
 
-            <h1 className="text-4xl font-bold tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
               Create account.
             </h1>
 
             <p className="text-gray-500 text-sm mt-2">
               Join Nexora and start tracking the crypto market.
             </p>
+
           </div>
 
           {/* ================= FORM ================= */}
 
-          <form onSubmit={formik.handleSubmit} className="space-y-3">
+          <form
+            onSubmit={formik.handleSubmit}
+            className="space-y-3"
+          >
+
             {/* NAME */}
 
             <div>
+
               <label
                 htmlFor="name"
                 className="block text-sm text-gray-400 mb-1.5"
@@ -114,6 +163,7 @@ function Signup() {
               </label>
 
               <div className="relative">
+
                 <FiUser
                   size={16}
                   className="
@@ -147,24 +197,29 @@ function Signup() {
                     outline-none
                     transition
                     ${
-                      formik.touched.name && formik.errors.name
+                      formik.touched.name &&
+                      formik.errors.name
                         ? "border-red-500"
                         : "border-white/10 focus:border-red-500"
                     }
                   `}
                 />
+
               </div>
 
-              {formik.touched.name && formik.errors.name && (
-                <p className="text-xs text-red-500 mt-1">
-                  {formik.errors.name}
-                </p>
-              )}
+              {formik.touched.name &&
+                formik.errors.name && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {formik.errors.name}
+                  </p>
+                )}
+
             </div>
 
             {/* EMAIL */}
 
             <div>
+
               <label
                 htmlFor="email"
                 className="block text-sm text-gray-400 mb-1.5"
@@ -173,6 +228,7 @@ function Signup() {
               </label>
 
               <div className="relative">
+
                 <FiMail
                   size={16}
                   className="
@@ -206,24 +262,29 @@ function Signup() {
                     outline-none
                     transition
                     ${
-                      formik.touched.email && formik.errors.email
+                      formik.touched.email &&
+                      formik.errors.email
                         ? "border-red-500"
                         : "border-white/10 focus:border-red-500"
                     }
                   `}
                 />
+
               </div>
 
-              {formik.touched.email && formik.errors.email && (
-                <p className="text-xs text-red-500 mt-1">
-                  {formik.errors.email}
-                </p>
-              )}
+              {formik.touched.email &&
+                formik.errors.email && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {formik.errors.email}
+                  </p>
+                )}
+
             </div>
 
             {/* PASSWORD */}
 
             <div>
+
               <label
                 htmlFor="password"
                 className="block text-sm text-gray-400 mb-1.5"
@@ -232,6 +293,7 @@ function Signup() {
               </label>
 
               <div className="relative">
+
                 <FiLock
                   size={16}
                   className="
@@ -246,7 +308,11 @@ function Signup() {
                 <input
                   id="password"
                   name="password"
-                  type={showPassword ? "text" : "password"}
+                  type={
+                    showPassword
+                      ? "text"
+                      : "password"
+                  }
                   placeholder="Create password"
                   value={formik.values.password}
                   onChange={formik.handleChange}
@@ -265,7 +331,8 @@ function Signup() {
                     outline-none
                     transition
                     ${
-                      formik.touched.password && formik.errors.password
+                      formik.touched.password &&
+                      formik.errors.password
                         ? "border-red-500"
                         : "border-white/10 focus:border-red-500"
                     }
@@ -274,7 +341,11 @@ function Signup() {
 
                 <button
                   type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
+                  onClick={() =>
+                    setShowPassword(
+                      (prev) => !prev
+                    )
+                  }
                   className="
                     absolute
                     right-4
@@ -284,20 +355,28 @@ function Signup() {
                     hover:text-gray-300
                   "
                 >
-                  {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                  {showPassword ? (
+                    <FiEyeOff size={16} />
+                  ) : (
+                    <FiEye size={16} />
+                  )}
                 </button>
+
               </div>
 
-              {formik.touched.password && formik.errors.password && (
-                <p className="text-xs text-red-500 mt-1">
-                  {formik.errors.password}
-                </p>
-              )}
+              {formik.touched.password &&
+                formik.errors.password && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {formik.errors.password}
+                  </p>
+                )}
+
             </div>
 
             {/* CONFIRM PASSWORD */}
 
             <div>
+
               <label
                 htmlFor="confirmPassword"
                 className="block text-sm text-gray-400 mb-1.5"
@@ -306,6 +385,7 @@ function Signup() {
               </label>
 
               <div className="relative">
+
                 <FiLock
                   size={16}
                   className="
@@ -320,9 +400,15 @@ function Signup() {
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type={showPassword2 ? "text" : "password"}
+                  type={
+                    showPassword2
+                      ? "text"
+                      : "password"
+                  }
                   placeholder="Confirm password"
-                  value={formik.values.confirmPassword}
+                  value={
+                    formik.values.confirmPassword
+                  }
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   className={`
@@ -349,7 +435,11 @@ function Signup() {
 
                 <button
                   type="button"
-                  onClick={() => setShowPassword2((prev) => !prev)}
+                  onClick={() =>
+                    setShowPassword2(
+                      (prev) => !prev
+                    )
+                  }
                   className="
                     absolute
                     right-4
@@ -359,8 +449,13 @@ function Signup() {
                     hover:text-gray-300
                   "
                 >
-                  {showPassword2 ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                  {showPassword2 ? (
+                    <FiEyeOff size={16} />
+                  ) : (
+                    <FiEye size={16} />
+                  )}
                 </button>
+
               </div>
 
               {formik.touched.confirmPassword &&
@@ -369,23 +464,27 @@ function Signup() {
                     {formik.errors.confirmPassword}
                   </p>
                 )}
+
             </div>
 
             {/* TERMS */}
 
             <div>
+
               <label className="flex items-start gap-2 cursor-pointer">
+
                 <input
                   type="checkbox"
                   name="terms"
                   checked={formik.values.terms}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className="mt-1 accent-red-500"
+                  className="mt-1 accent-red-500 shrink-0"
                 />
 
                 <span className="text-xs text-gray-500 leading-5">
-                  I agree to the{" "}
+                  I agree to{" "}
+
                   <NavLink
                     to="/signup/terms"
                     className="text-red-500 hover:underline"
@@ -393,13 +492,16 @@ function Signup() {
                     Terms & Conditions
                   </NavLink>
                 </span>
+
               </label>
 
-              {formik.touched.terms && formik.errors.terms && (
-                <p className="text-xs text-red-500 mt-1">
-                  {formik.errors.terms}
-                </p>
-              )}
+              {formik.touched.terms &&
+                formik.errors.terms && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {formik.errors.terms}
+                  </p>
+                )}
+
             </div>
 
             {/* CREATE ACCOUNT */}
@@ -426,20 +528,25 @@ function Signup() {
             {/* DIVIDER */}
 
             <div className="flex items-center gap-3 py-1">
-              <div className="h-px flex-1 bg-white/10" />
-
-              <span className="text-xs text-gray-600">OR</span>
 
               <div className="h-px flex-1 bg-white/10" />
+
+              <span className="text-xs text-gray-600">
+                OR
+              </span>
+
+              <div className="h-px flex-1 bg-white/10" />
+
             </div>
 
-            {/* SOCIAL LOGIN */}
+            {/* GOOGLE */}
 
-            <div className="flex gap-3">
+            <div className="flex">
+
               <button
                 type="button"
                 className="
-                  flex-1
+                  w-full
                   h-10
                   flex
                   items-center
@@ -454,39 +561,53 @@ function Signup() {
                 "
               >
                 <FcGoogle size={17} />
-                <span>Continue with Google</span>
+
+                <span>
+                  Continue with Google
+                </span>
               </button>
+
             </div>
 
             {/* LOGIN */}
 
-            <div className="flex justify-center gap-2 pt-1">
-              <p className="text-md text-gray-600">Already have an account?</p>
+            <div className="flex flex-wrap justify-center gap-2 pt-1">
+
+              <p className="text-sm text-gray-600">
+                Already have an account?
+              </p>
 
               <NavLink
                 to="/login"
-                className="text-md text-red-500 hover:text-red-400"
+                className="text-sm text-red-500 hover:text-red-400"
               >
                 Log In
               </NavLink>
+
             </div>
+
           </form>
+
         </div>
 
         {/* ================= RIGHT SIDE ================= */}
 
+        {/* Hidden on mobile */}
+
         <div
           className="
-            w-1/2
+            hidden
+            md:flex
+            md:w-1/2
             relative
             overflow-hidden
             bg-[#080808]
             border-l border-white/10
-            flex
             items-center
             justify-center
           "
         >
+
           {/* GRID */}
 
           <div
@@ -504,8 +625,10 @@ function Signup() {
           <div
             className="
               absolute
-              w-[380px]
-              h-[380px]
+              w-[280px]
+              h-[280px]
+              lg:w-[380px]
+              lg:h-[380px]
               bg-red-500/10
               blur-[110px]
               rounded-full
@@ -514,10 +637,23 @@ function Signup() {
 
           {/* CONTENT */}
 
-          <div className="relative z-10 w-full px-10 text-center">
+          <div className="relative z-10 w-full px-6 lg:px-10 text-center">
+
             {/* MAIN VISUAL */}
 
-            <div className="relative w-[350px] h-[245px] mx-auto mb-8">
+            <div
+              className="
+                relative
+                w-[290px]
+                sm:w-[330px]
+                lg:w-[350px]
+                h-[220px]
+                lg:h-[245px]
+                mx-auto
+                mb-8
+              "
+            >
+
               {/* DASHBOARD */}
 
               <div
@@ -528,71 +664,137 @@ function Signup() {
                   bg-[#101010]
                   border border-white/10
                   shadow-2xl
-                  p-6
+                  p-4
+                  lg:p-6
                   text-left
                 "
               >
+
                 {/* HEADER */}
 
                 <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-xs text-gray-600">NEXORA</p>
 
-                    <p className="text-xl font-bold mt-1">
+                  <div>
+
+                    <p className="text-xs text-gray-600">
+                      NEXORA
+                    </p>
+
+                    <p className="text-lg lg:text-xl font-bold mt-1">
                       Your crypto journey
                     </p>
+
                   </div>
 
                   <img
                     src={icon.logo}
-                    alt="logo"
-                    className="w-7 h-7 rounded-lgflex items-center justify-center font-black"
+                    alt="Nexora logo"
+                    className="w-7 h-7 object-contain"
                   />
+
                 </div>
 
                 {/* STATS */}
 
-                <div className="grid grid-cols-2 gap-3 mt-7">
-                  <div className="bg-[#171717] rounded-xl p-4">
-                    <p className="text-[10px] text-gray-600">PORTFOLIO</p>
+                <div className="grid grid-cols-2 gap-3 mt-5 lg:mt-7">
 
-                    <p className="text-lg font-bold mt-1">₹24,892</p>
+                  <div className="bg-[#171717] rounded-xl p-3 lg:p-4">
 
-                    <p className="text-xs text-green-500 mt-1">+8.42%</p>
+                    <p className="text-[10px] text-gray-600">
+                      PORTFOLIO
+                    </p>
+
+                    <p className="text-base lg:text-lg font-bold mt-1">
+                      ₹24,892
+                    </p>
+
                   </div>
 
-                  <div className="bg-[#171717] rounded-xl p-4">
-                    <p className="text-[10px] text-gray-600">WATCHLIST</p>
+                  <div className="bg-[#171717] rounded-xl p-3 lg:p-4">
 
-                    <p className="text-lg font-bold mt-1">18</p>
+                    <p className="text-[10px] text-gray-600">
+                      PROFIT
+                    </p>
 
-                    <p className="text-xs text-gray-600 mt-1">coins tracked</p>
+                    <p className="text-base lg:text-lg font-bold text-red-500 mt-1">
+                      +₹2,481
+                    </p>
+
                   </div>
+
                 </div>
 
-                {/* MINI CHART */}
+                {/* CHART */}
 
-                <div className="mt-4 h-8">
+                <div className="mt-5 lg:mt-6 h-[55px] lg:h-[65px]">
+
                   <svg
-                    viewBox="0 0 400 40"
+                    viewBox="0 0 400 100"
                     className="w-full h-full"
                     preserveAspectRatio="none"
                   >
+
+                    <defs>
+
+                      <linearGradient
+                        id="signupChart"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+
+                        <stop
+                          offset="0%"
+                          stopColor="#ef4444"
+                          stopOpacity="0.3"
+                        />
+
+                        <stop
+                          offset="100%"
+                          stopColor="#ef4444"
+                          stopOpacity="0"
+                        />
+
+                      </linearGradient>
+
+                    </defs>
+
                     <path
                       d="
-                        M0 35
-                        C30 30 40 20 70 25
-                        C100 30 120 10 150 18
-                        C180 25 200 12 230 15
-                        C260 18 280 5 310 10
-                        C340 15 370 3 400 5
+                        M0 85
+                        C35 80 45 60 80 68
+                        C110 75 125 45 155 55
+                        C185 65 200 35 230 45
+                        C260 55 275 60 305 32
+                        C330 10 350 30 370 20
+                        C385 12 395 15 400 8
+                        L400 100
+                        L0 100
+                        Z
+                      "
+                      fill="url(#signupChart)"
+                    />
+
+                    <path
+                      d="
+                        M0 85
+                        C35 80 45 60 80 68
+                        C110 75 125 45 155 55
+                        C185 65 200 35 230 45
+                        C260 55 275 60 305 32
+                        C330 10 350 30 370 20
+                        C385 12 395 15 400 8
                       "
                       fill="none"
                       stroke="#ef4444"
-                      strokeWidth="2"
+                      strokeWidth="3"
                     />
+
                   </svg>
+
                 </div>
+
               </div>
 
               {/* FLOATING CARD */}
@@ -600,28 +802,41 @@ function Signup() {
               <div
                 className="
                   absolute
-                  -right-8
-                  -top-7
+                  -right-2
+                  lg:-right-6
+                  -top-5
+                  lg:-top-6
                   bg-[#151515]
                   border border-white/10
                   rounded-xl
-                  px-4
-                  py-3
+                  px-3
+                  lg:px-4
+                  py-2
+                  lg:py-3
                   shadow-xl
                   flex
                   items-center
-                  gap-3
+                  gap-2
+                  lg:gap-3
                 "
               >
-                <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
-                  +
+
+                <div className="w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
+                  ₿
                 </div>
 
                 <div className="text-left">
-                  <p className="text-[9px] text-gray-600">ACCOUNT</p>
 
-                  <p className="text-xs font-semibold">Successfully created</p>
+                  <p className="text-[9px] text-gray-600">
+                    MARKET
+                  </p>
+
+                  <p className="text-xs font-semibold">
+                    Live data
+                  </p>
+
                 </div>
+
               </div>
 
               {/* STATUS */}
@@ -629,38 +844,49 @@ function Signup() {
               <div
                 className="
                   absolute
-                  -left-7
+                  -left-2
+                  lg:-left-6
                   bottom-2
                   bg-[#151515]
                   border border-white/10
                   rounded-xl
-                  px-4
-                  py-2.5
+                  px-3
+                  lg:px-4
+                  py-2
                   shadow-xl
                   flex
                   items-center
                   gap-2
                 "
               >
-                <span className="w-2 h-2 bg-red-500 rounded-full" />
 
-                <span className="text-xs text-gray-400">Welcome to Nexora</span>
+                <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+
+                <span className="text-[10px] lg:text-xs text-gray-400">
+                  Market tracking active
+                </span>
+
               </div>
+
             </div>
 
             {/* RIGHT TEXT */}
 
-            <h2 className="text-2xl font-bold">
+            <h2 className="text-xl lg:text-2xl font-bold">
               Your crypto journey starts here.
             </h2>
 
-            <p className="text-sm text-gray-500 mt-3 max-w-sm mx-auto leading-6">
-              Create your Nexora account and keep everything you need to follow
-              the market in one place.
+            <p className="text-sm text-gray-500 mt-3 max-w-sm mx-auto leading-6 px-4">
+              Create your account and stay updated
+              with the latest crypto market movements.
             </p>
+
           </div>
+
         </div>
+
       </div>
+
     </div>
   );
 }
