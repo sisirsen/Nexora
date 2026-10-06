@@ -1,159 +1,366 @@
-import React from "react";
-import { useState, useEffect } from "react";
-import { IoMdArrowDropdown } from "react-icons/io";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-function TrendingCoins() {
-  const [TrendingCoins, setTrendingCoins] = useState([]);
+const TRENDING_API = "https://api.coingecko.com/api/v3/search/trending";
 
-  const [Errormsg, setErrormsg] = useState("");
+const USD_API = "https://open.er-api.com/v6/latest/USD";
 
-  const [UsdtoInr, setUsdtoInr] = useState(90);
+const TRENDING_CACHE_KEY = "trending_coins_cache";
+const USD_CACHE_KEY = "usd_inr_cache";
 
-  const [Loading, setLoading] = useState(true);
+const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
 
-  async function fetchData() {
-    try {
-      setLoading(true);
-      let response = await fetch(
-        "https://api.coingecko.com/api/v3/search/trending",
-      );
-      let data = await response.json();
-      setTrendingCoins(data.coins);
-      
-    } catch (error) {
-      setErrormsg(error.message);
+// ============================================================
+// Cache Helper
+// ============================================================
+
+function getCache(key) {
+  try {
+    const cached = localStorage.getItem(key);
+
+    if (!cached) return null;
+
+    const parsed = JSON.parse(cached);
+
+    const isExpired = Date.now() - parsed.timestamp > CACHE_DURATION;
+
+    if (isExpired) {
+      localStorage.removeItem(key);
+      return null;
     }
-    finally{
+
+    return parsed.data;
+  } catch (error) {
+    console.error("Cache read error:", error);
+    return null;
+  }
+}
+
+// ============================================================
+// Save Cache
+// ============================================================
+
+function setCache(key, data) {
+  try {
+    localStorage.setItem(
+      key,
+      JSON.stringify({
+        data,
+        timestamp: Date.now(),
+      }),
+    );
+  } catch (error) {
+    console.error("Cache save error:", error);
+  }
+}
+
+// ============================================================
+// Loading Component
+// ============================================================
+
+function LoadingComponent() {
+  return (
+    <div className="mt-29 flex w-full items-center justify-center">
+      <div className="flex h-[525px] w-full items-center justify-center rounded-xl border border-white/10 bg-[#111111] px-10 py-8 transition-all duration-500 hover:border-[#FE4136] md:w-[600px]">
+        <div className="flex flex-col items-center gap-5">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#FE4136] border-t-transparent" />
+
+          <p className="text-lg text-white">Fetching trending data...</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// Error Component
+// ============================================================
+
+function ErrorComponent({ message, onRetry }) {
+  return (
+    <div className="mt-29 flex w-full justify-center">
+      <div className="grid h-[525px] w-full place-content-center rounded-xl border border-red-500 bg-[#111111] p-8 text-center md:w-[600px]">
+        <h2 className="text-xl font-bold text-red-500">
+          Failed to load market data
+        </h2>
+
+        <p className="mt-2 text-gray-400">{message || "Please try again."}</p>
+
+        <button
+          onClick={onRetry}
+          className="mx-auto mt-6 rounded-lg bg-[#FE4136] px-6 py-3 text-white transition hover:bg-red-700 active:scale-95"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// Trending Coin Row
+// ============================================================
+
+function TrendingCoinRow({ coin, index, usdToInr }) {
+  const item = coin.item;
+
+  const price = Number(item?.data?.price ?? 0) * usdToInr;
+
+  const priceChange = item?.data?.price_change_percentage_24h?.inr ?? 0;
+
+  const isPositive = priceChange >= 0;
+
+  return (
+    <tr className="border-b border-white/10 transition-all duration-300 hover:bg-white/[0.03]">
+      {/* Rank */}
+      <td className="px-4 py-5 text-center text-gray-400">#{index + 1}</td>
+
+      {/* Coin */}
+      <td className="py-3 md:py-5.5">
+        <Link
+          to={`/market/coin/${item.id}`}
+          className="flex items-center gap-3"
+        >
+          <img
+            src={item?.thumb}
+            alt={`${item?.name} logo`}
+            className="hidden md:flex h-9 w-9 rounded-full"
+            loading="lazy"
+          />
+
+          <div>
+            <div className="font-semibold text-white transition-colors duration-200 hover:text-[#FE4136]">
+              {item.name}
+
+              <p className="text-xs uppercase text-gray-500">{item.symbol}</p>
+            </div>
+          </div>
+        </Link>
+      </td>
+
+      {/* Price */}
+      <td className="px-4 py-5 text-center font-medium text-white">
+        ₹{price.toLocaleString("en-IN")}
+      </td>
+
+      {/* 24h Change */}
+      <td
+        className={`px-4 py-5 text-center font-semibold ${
+          isPositive ? "text-green-500" : "text-red-400"
+        }`}
+      >
+        {priceChange.toFixed(2)}%
+      </td>
+    </tr>
+  );
+}
+
+// ============================================================
+// Main Component
+// ============================================================
+
+function TrendingCoins() {
+  const [trendingCoins, setTrendingCoins] = useState([]);
+  const [usdToInr, setUsdToInr] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // ==========================================================
+  // Fetch Data
+  // ==========================================================
+
+  const fetchData = useCallback(async (forceRefresh = false) => {
+    try {
+      setErrorMsg("");
+
+      // --------------------------------------------------------
+      // Check cache first
+      // --------------------------------------------------------
+
+      if (!forceRefresh) {
+        const cachedTrending = getCache(TRENDING_CACHE_KEY);
+
+        const cachedUsd = getCache(USD_CACHE_KEY);
+
+        if (cachedTrending) {
+          setTrendingCoins(cachedTrending);
+        }
+
+        if (cachedUsd) {
+          setUsdToInr(cachedUsd);
+        }
+
+        // If both caches are valid, no API request required
+        if (cachedTrending && cachedUsd) {
+          setLoading(false);
+          return;
+        }
+      }
+
+      setLoading(true);
+
+      // --------------------------------------------------------
+      // API Requests
+      // --------------------------------------------------------
+
+      const requests = [];
+
+      if (forceRefresh || !getCache(TRENDING_CACHE_KEY)) {
+        requests.push(
+          fetch(TRENDING_API)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`Trending API failed: ${response.status}`);
+              }
+
+              return response.json();
+            })
+            .then((data) => {
+              if (!data?.coins) {
+                throw new Error("Invalid trending API response.");
+              }
+
+              setTrendingCoins(data.coins);
+
+              setCache(TRENDING_CACHE_KEY, data.coins);
+            }),
+        );
+      }
+
+      if (forceRefresh || !getCache(USD_CACHE_KEY)) {
+        requests.push(
+          fetch(USD_API)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`Currency API failed: ${response.status}`);
+              }
+
+              return response.json();
+            })
+            .then((data) => {
+              const rate = data?.rates?.INR;
+
+              if (!rate) {
+                throw new Error("INR conversion rate unavailable.");
+              }
+
+              setUsdToInr(rate);
+
+              setCache(USD_CACHE_KEY, rate);
+            }),
+        );
+      }
+
+      // Run both requests together
+      await Promise.all(requests);
+    } catch (error) {
+      console.error(error);
+
+      /*
+        Try cached data as fallback.
+      */
+
+      const cachedTrending = getCache(TRENDING_CACHE_KEY);
+
+      const cachedUsd = getCache(USD_CACHE_KEY);
+
+      if (cachedTrending) {
+        setTrendingCoins(cachedTrending);
+      }
+
+      if (cachedUsd) {
+        setUsdToInr(cachedUsd);
+      }
+
+      /*
+        Only show the error screen if
+        we have no usable data at all.
+      */
+
+      if (!cachedTrending || !cachedUsd) {
+        setErrorMsg(error.message);
+      }
+    } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  async function convertCoin() {
-    let response2 = await fetch("https://open.er-api.com/v6/latest/USD");
-    let data2 = await response2.json();
-    setUsdtoInr(data2.rates.INR);
-  }
+  // ==========================================================
+  // Initial Fetch
+  // ==========================================================
 
   useEffect(() => {
     fetchData();
+  }, [fetchData]);
 
-    convertCoin();
-  }, []);
+  // ==========================================================
+  // Loading
+  // ==========================================================
 
-  const loading = () => {
-    return (
-      <div className="w-full flex justify-center items-center mt-29">
-        <div className="bg-[#111111] border w-[600px] h-[525px] border-white/10 hover:border-[#FE4136] rounded-xl px-10 py-8 flex justify-center items-center gap-5 transition-all duration-500">
-          <div className="w-10 h-10 border-4 border-[#FE4136] rounded-[16px] animate-spin"></div>
-
-          <p className="text-white text-lg">Fetching live market data...</p>
-        </div>
-      </div>
-    );
-  };
-
-  const ErrorComponent = () => {
-    return (
-      <div className="w-full flex justify-center mt-29">
-        <div className="bg-[#111111] w-[600px] h-[525px] grid place-content-center border border-red-500 rounded-xl p-8  text-center">
-          <h2 className="text-red-500 text-xl font-bold">
-            Failed to load market data
-          </h2>
-
-          <p className="text-gray-400 mt-2">
-            Please check your internet connection.
-          </p>
-
-          <div>
-            <button
-            onClick={fetchData}
-            className="mt-6 px-6 py-3 w-23 bg-[#FE4136] rounded-lg text-white hover:bg-red-700 transition"
-          >
-            Retry
-          </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  if (Loading) {
-    return loading();
+  if (loading && trendingCoins.length === 0) {
+    return <LoadingComponent />;
   }
-  if (Errormsg) {
-    return ErrorComponent();
+
+  // ==========================================================
+  // Error
+  // ==========================================================
+
+  if (errorMsg && trendingCoins.length === 0) {
+    return (
+      <ErrorComponent message={errorMsg} onRetry={() => fetchData(true)} />
+    );
   }
+
+  // ==========================================================
+  // UI
+  // ==========================================================
 
   return (
-    <div className="mt-10 md:mt-30">
-      <div className="mt-7 bg-[#111111] w-full h-fit p-3 md:p-7 border border-white/10 hover:border-[#FE4136] rounded-xl">
-        <div className="flex justify-center mb-7">
-          <span className="text-2xl text-white font-semibold">
+    <div className="mt-10 md:mt-30 md:w-full md:min-w-[600px]">
+      <div className="mt-7 w-full rounded-xl border border-white/10 bg-[#111111] py-4 transition-all duration-500 hover:border-[#FE4136] md:p-6">
+        {/* Header */}
+        <div className="mb-7 flex items-center justify-center">
+          <span className="md:text-2xl text-lg font-semibold text-white">
             Trending Coins 🔥
           </span>
         </div>
 
-        <div className="text-white flex flex-col gap-2 justify-between">
-          {TrendingCoins.slice(0, 5).map((coin, index) => (
-            <Link
-              key={coin.item.id}
-              to={`coin/${coin.item.id}`}
-              className="flex items-center border-b border-white/10 pb-4 rounded-xl hover:border-b hover:border-red-500 transition-all duration-500"
-            >
-              <div className="text-center w-[135px]">
-                <div className="text-[#FE4136] font-semibold md:text-lg">Rank</div>
-                <div className="mt-1 text-sm">{index + 1}</div>
-              </div>
+        {/* Trending Coins */}
+        <div className="overflow-x-auto">
+          <table className="w-full  border-collapse text-sm text-white">
+            {/* Table Header */}
+            <thead>
+              <tr className="border-b border-white/10">
+                <th className="px-4 py-4 md:text-lg text-center font-semibold text-[#FE4136]">
+                  Rank
+                </th>
 
-              <div className="text-center w-[135px]">
-                <div className="text-[#FE4136] font-semibold md:text-lg">Coin</div>
+                <th className="px-4 py-4 md:text-lg text-left font-semibold text-[#FE4136]">
+                  Coin
+                </th>
 
-                <div className="mt-1">
-                  <div className="font-medium text-sm">{coin.item.name}</div>
-                </div>
-              </div>
-
-              <div className="text-center w-[135px]">
-                <div className="text-[#FE4136] font-semibold md:text-lg">
+                <th className="px-4 py-4 text-center md:text-lg font-semibold text-[#FE4136]">
                   Price
-                </div>
+                </th>
 
-                <div className="mt-1 text-sm">
-                  ₹
-                  {(Number(coin?.item?.data?.price) * UsdtoInr).toLocaleString(
-                    "en-IN",
-                  )}
-                </div>
-              </div>
-
-              <div className="text-center w-[135px]">
-                <div className="text-[#FE4136] font-semibold md:text-lg">
+                <th className="px-4 py-4 text-center md:text-lg font-semibold text-[#FE4136]">
                   24h %
-                </div>
+                </th>
+              </tr>
+            </thead>
 
-                <div
-                  className={`mt-1 text-sm font-medium ${
-                    coin?.item?.data?.price_change_percentage_24h?.inr > 0
-                      ? "text-green-500"
-                      : "text-gray-500"
-                  }`}
-                >
-                  {coin?.item?.data?.price_change_percentage_24h?.inr?.toFixed(
-                    2,
-                  )}
-                  %
-                </div>
-              </div>
-            </Link>
-          ))}
-
-          {/* <div className="flex justify-center gap-1 cursor-pointer mt-2">
-            <span className="bg-[#FE4136] flex items-center px-4 py-2 rounded-xl active:scale-90 hover:scale-105 transition-all duration-500 text-sm">
-              See More
-              <IoMdArrowDropdown className="text-lg" />
-            </span>
-          </div> */}
+            {/* Table Body */}
+            <tbody>
+              {trendingCoins.slice(0, 4).map((coin, index) => (
+                <TrendingCoinRow
+                  key={coin.item.id}
+                  coin={coin}
+                  index={index}
+                  usdToInr={usdToInr || 0}
+                />
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

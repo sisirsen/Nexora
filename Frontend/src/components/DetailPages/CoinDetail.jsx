@@ -1,552 +1,731 @@
-import { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
-import { FaArrowUp, FaArrowDown } from "react-icons/fa";
-import { FiStar } from "react-icons/fi";
-import { FaStar } from "react-icons/fa";
-import { FaGlobe, FaGithub, FaDiscord, FaReddit } from "react-icons/fa";
-import { motion } from "framer-motion";
-import Chart from "../Subpages/Chart";
-import { FiAlertOctagon } from "react-icons/fi";
+
+import {
+  FaArrowUp,
+  FaArrowDown,
+  FaGlobe,
+  FaGithub,
+  FaDiscord,
+  FaReddit,
+  FaStar,
+} from "react-icons/fa";
+
+import { FiStar, FiAlertOctagon } from "react-icons/fi";
 
 import { SiX } from "react-icons/si";
 
 import { HiDocumentText } from "react-icons/hi2";
 
 import { BsBoxArrowUpRight } from "react-icons/bs";
-import { div } from "framer-motion/client";
 
-function CoinDetails() {
-  const { id } = useParams();
+import { motion } from "framer-motion";
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+import Chart from "../Subpages/Chart";
 
- const exchanges = [
+// ============================================================
+// API
+// ============================================================
+
+const API_URL = "https://api.coingecko.com/api/v3/coins";
+
+// ============================================================
+// CACHE
+// ============================================================
+
+const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
+
+const getCacheKey = (coinId) => {
+  return `coin_details_${coinId}`;
+};
+
+function getCachedCoin(coinId) {
+  try {
+    const cached = localStorage.getItem(getCacheKey(coinId));
+
+    if (!cached) {
+      return null;
+    }
+
+    const parsed = JSON.parse(cached);
+
+    const age = Date.now() - parsed.timestamp;
+
+    if (age > CACHE_DURATION) {
+      localStorage.removeItem(getCacheKey(coinId));
+
+      return null;
+    }
+
+    return parsed.data;
+  } catch (error) {
+    console.error("Cache read error:", error);
+
+    return null;
+  }
+}
+
+function saveCachedCoin(coinId, data) {
+  try {
+    localStorage.setItem(
+      getCacheKey(coinId),
+      JSON.stringify({
+        data,
+        timestamp: Date.now(),
+      }),
+    );
+  } catch (error) {
+    console.error("Cache save error:", error);
+  }
+}
+
+// ============================================================
+// EXCHANGES
+// ============================================================
+
+const exchanges = [
   {
-    id:1,
+    id: 1,
     name: "Binance",
     logo: "https://cdn.simpleicons.org/binance/F3BA2F",
     desc: "Trade on the world's largest crypto exchange.",
     link: "https://www.binance.com/",
   },
+
   {
-    id:2,
+    id: 2,
     name: "Bybit",
     logo: "https://images.seeklogo.com/logo-png/41/1/bybit-logo-png_seeklogo-412982.png",
     desc: "Buy and trade cryptocurrencies with low fees.",
     link: "https://www.bybit.com/",
   },
+
   {
-    id:3,
+    id: 3,
     name: "Coinbase",
     logo: "https://cryptologos.cc/logos/usd-coin-usdc-logo.png",
     desc: "Beginner-friendly cryptocurrency exchange.",
     link: "https://www.coinbase.com/",
   },
+
   {
-    id:4,
+    id: 4,
     name: "KuCoin",
     logo: "https://cryptologos.cc/logos/kucoin-token-kcs-logo.png",
     desc: "Trade hundreds of digital assets.",
     link: "https://www.kucoin.com/",
-  }
+  },
 ];
 
+// ============================================================
+// LOADING COMPONENT
+// ============================================================
 
+function LoadingComponent() {
+  return (
+    <div className="flex w-full items-center justify-center py-40">
+      <div className="flex flex-col items-center gap-5 rounded-xl border border-white/10 bg-[#111111] px-10 py-8 transition-all duration-500 hover:border-[#FE4136]">
+        <div className="h-10 w-10 animate-spin rounded-[16px] border-4 border-[#FE4136] border-t-transparent" />
+
+        <p className="text-lg text-white">Fetching live market data...</p>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// ERROR COMPONENT
+// ============================================================
+
+function ErrorComponent({ message, onRetry }) {
+  return (
+    <div className="flex w-full justify-center py-40">
+      <div className="rounded-xl border border-red-500 bg-[#111111] p-8 text-center">
+        <h2 className="text-xl font-bold text-red-500">
+          Failed to load market data
+        </h2>
+
+        <p className="mt-2 text-gray-400">
+          {message || "Please check your internet connection."}
+        </p>
+
+        <button
+          onClick={onRetry}
+          className="mt-6 rounded-lg bg-[#FE4136] px-6 py-3 text-white transition hover:bg-red-700 active:scale-95"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
+
+function CoinDetails() {
+  const { id } = useParams();
+
+  // ==========================================================
+  // STATE
+  // ==========================================================
 
   const [coin, setCoin] = useState(null);
+
   const [loading, setLoading] = useState(true);
-  const [Error, setError] = useState("");
-  const [readMore, setReadMore] = useState(false)
-  const [showWatchlist, setshowWatchlist] = useState(false)
 
-  async function fetchCoin() {
-    try {
-      setLoading(true);
-      const response = await fetch(
-        `https://api.coingecko.com/api/v3/coins/${id}`,
-      );
+  const [errorMsg, setErrorMsg] = useState("");
 
-      const data = await response.json();
+  const [readMore, setReadMore] = useState(false);
 
-      setCoin(data);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [showWatchlist, setShowWatchlist] = useState(false);
 
-  const LoadingComponent = () => {
-    return (
-      <div className="w-full flex justify-center items-center py-40">
-        <div className="bg-[#111111] border border-white/10 hover:border-[#FE4136] rounded-xl px-10 py-8 flex flex-col items-center gap-5 transition-all duration-500">
-          <div className="w-10 h-10 border-4 border-[#FE4136] rounded-[16px] animate-spin"></div>
+  // ==========================================================
+  // FETCH COIN
+  // ==========================================================
 
-          <p className="text-white text-lg">Fetching live market data...</p>
-        </div>
-      </div>
-    );
-  };
+  const fetchCoin = useCallback(
+    async (forceRefresh = false) => {
+      try {
+        setErrorMsg("");
 
-  const ErrorComponent = () => {
-    return (
-      <div className="w-full flex justify-center py-40">
-        <div className="bg-[#111111] border border-red-500 rounded-xl p-8 text-center">
-          <h2 className="text-red-500 text-xl font-bold">
-            Failed to load market data
-          </h2>
+        // ------------------------------------------------------
+        // CHECK CACHE
+        // ------------------------------------------------------
 
-          <p className="text-gray-400 mt-2">
-            Please check your internet connection.
-          </p>
+        if (!forceRefresh) {
+          const cachedCoin = getCachedCoin(id);
 
-          <button
-            onClick={fetchCoin}
-            className="mt-6 px-6 py-3 bg-[#FE4136] rounded-lg text-white hover:bg-red-700 transition"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  };
+          if (cachedCoin) {
+            setCoin(cachedCoin);
+            setLoading(false);
+
+            return;
+          }
+        }
+
+        // ------------------------------------------------------
+        // FETCH API
+        // ------------------------------------------------------
+
+        setLoading(true);
+
+        const controller = new AbortController();
+
+        const timeout = setTimeout(() => {
+          controller.abort();
+        }, 10000);
+
+        const response = await fetch(`${API_URL}/${id}`, {
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeout);
+
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!data) {
+          throw new Error("Invalid response from CoinGecko.");
+        }
+
+        // ------------------------------------------------------
+        // UPDATE STATE
+        // ------------------------------------------------------
+
+        setCoin(data);
+
+        // ------------------------------------------------------
+        // SAVE CACHE
+        // ------------------------------------------------------
+
+        saveCachedCoin(id, data);
+      } catch (error) {
+        console.error(error);
+
+        if (error.name === "AbortError") {
+          setErrorMsg("Request timed out.");
+        } else {
+          setErrorMsg(error.message || "Something went wrong.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [id],
+  );
+
+  // ==========================================================
+  // FETCH WHEN COIN ID CHANGES
+  // ==========================================================
 
   useEffect(() => {
-    fetchCoin();
-  }, [id]);
+    window.scrollTo(0, 0);
 
-  if (loading) {
+    fetchCoin();
+  }, [id, fetchCoin]);
+
+  // ==========================================================
+  // LOADING
+  // ==========================================================
+
+  if (loading && !coin) {
     return <LoadingComponent />;
   }
 
-  if (Error) {
-    return <ErrorComponent />;
+  // ==========================================================
+  // ERROR
+  // ==========================================================
+
+  if (errorMsg && !coin) {
+    return (
+      <ErrorComponent message={errorMsg} onRetry={() => fetchCoin(true)} />
+    );
   }
+
+  // ==========================================================
+  // MARKET DATA SHORTCUT
+  // ==========================================================
+
+  const marketData = coin?.market_data;
+
+  const priceChange = marketData?.price_change_percentage_24h ?? 0;
+
+  const isPositive = priceChange >= 0;
+
+  const description = coin?.description?.en || "";
+
+  // ==========================================================
+  // UI
+  // ==========================================================
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.6 }}
+      initial={{
+        opacity: 0,
+        y: 20,
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      exit={{
+        opacity: 0,
+      }}
+      transition={{
+        duration: 0.6,
+      }}
     >
-      <div className="bg-[#020617] min-h-screen text-white py-32 px-7">
-        <div className="">
-          {/* Header */}
-          <div className="flex flex-row justify-center md:justify-normal items-center gap-6">
-            <img src={coin.image.large} alt={coin.name} className="w-20 h-20" />
+      <div className="min-h-screen bg-[#020617] px-7 py-32 text-white">
+        {/* ==================================================
+            HEADER
+        ================================================== */}
 
-            <div>
-              <h1 className=" text-3xl font-bold">
-                {coin.name} {" "}
-                <span className="text-[#FE4136] text-2xl rounded-full mt-3">
-                  #{coin.market_cap_rank}
-                </span>
-              </h1>
+        <div className="flex items-center justify-center gap-6 md:justify-normal">
+          <img src={coin.image?.large} alt={coin.name} className="h-20 w-20" />
 
-              <p className="uppercase text-gray-400 text-xl mt-2">
-                {coin.symbol}
-              </p>
-            </div>
-          </div>
+          <div>
+            <h1 className="text-3xl font-bold">
+              {coin.name}{" "}
+              <span className="rounded-full text-2xl text-[#FE4136]">
+                #{coin.market_cap_rank}
+              </span>
+            </h1>
 
-          {/* Price */}
-
-          <div className="mt-5 pl-3 flex gap-3 md:justify-normal justify-center items-center">
-            <h2 className="text-3xl md:text-4xl font-bold">
-              ₹ {coin.market_data.current_price.inr.toLocaleString()}
-            </h2>
-
-            <p
-              className={`md:text-xl flex items-center gap-1 font-semibold ${
-                coin.market_data.price_change_percentage_24h >= 0
-                  ? "text-green-500"
-                  : "text-red-500"
-              }`}
-            >
-              {coin.market_data.price_change_percentage_24h >= 0 ? (
-                <FaArrowUp />
-              ) : (
-                <FaArrowDown />
-              )}
-              {coin.market_data.price_change_percentage_24h.toFixed(2)}%
+            <p className="mt-2 text-xl uppercase text-gray-400">
+              {coin.symbol}
             </p>
-
-           <div className="relative group w-fit">
-             <button onClick={()=> setshowWatchlist(!showWatchlist)} className="text-white text-3xl cursor-pointer transition-all duration-500">
-              {showWatchlist? <FaStar /> : <FiStar/>}
-            </button>
-
-            {showWatchlist ? 
-    <div
-      className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2
-                 hidden group-hover:block
-                 bg-gray-700 font-bold text-white text-xs
-                 px-3 py-2 rounded-md whitespace-nowrap transition-all duration-500"
-    >
-      Coin Is Added To Watchlist
-    </div>
-
-    :
-
-    <div
-      className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2
-                 hidden group-hover:block
-                 bg-gray-700 font-bold text-white text-xs
-                 px-3 py-2 rounded-md whitespace-nowrap transition-all duration-500"
-    >
-      Add To Watchlist
-    </div>
-  }
-           </div>
           </div>
+        </div>
 
-          <div className="md:flex justify-between ">
-            <div className="">
+        {/* ==================================================
+            PRICE
+        ================================================== */}
+
+        <div className="mt-5 flex items-center justify-center gap-3 pl-3 md:justify-normal">
+          <h2 className="text-3xl font-bold md:text-4xl">
+            ₹ {marketData?.current_price?.inr?.toLocaleString("en-IN")}
+          </h2>
+
+          <p
+            className={`flex items-center gap-1 font-semibold md:text-xl ${
+              isPositive ? "text-green-500" : "text-red-500"
+            }`}
+          >
+            {isPositive ? <FaArrowUp /> : <FaArrowDown />}
+            {priceChange.toFixed(2)}%
+          </p>
+
+          {/* WATCHLIST */}
+          <div className="relative w-fit">
+            <button
+              type="button"
+              onClick={() => {
+                setShowWatchlist((prev) => {
+                  const newState = !prev;
+
+                  if (newState) {
+                    toast.success("Coin added to watchlist!");
+                  } else {
+                    toast("Coin removed from watchlist");
+                  }
+
+                  return newState;
+                });
+              }}
+              className="cursor-pointer text-3xl text-white transition-all duration-300 hover:scale-110"
+              aria-label="Toggle watchlist"
+            >
+              {showWatchlist ? <FaStar /> : <FiStar />}
+            </button>
+          </div>
+        </div>
+
+        {/* ==================================================
+            CHART
+        ================================================== */}
+
+        <div className="md:flex md:justify-between gap-6">
+          <div className="w-full max-w-[750px]">
             <Chart />
           </div>
 
-          {/* Stats */}
+          {/* ==================================================
+            MARKET STATISTICS
+        ================================================== */}
 
           <div className="mt-10 md:w-[720px]">
-            <h2 className="text-3xl font-bold mb-6">Market Statistics</h2>
+            <h2 className="mb-6 text-3xl font-bold">Market Statistics</h2>
 
             <div className="space-y-4">
               {/* Market Cap */}
-              <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <span className="text-gray-400">Market Cap</span>
+
                 <span className="font-semibold">
-                  ₹ {coin.market_data.market_cap.inr.toLocaleString()}
+                  ₹ {marketData?.market_cap?.inr?.toLocaleString("en-IN")}
                 </span>
               </div>
 
               {/* 24H Volume */}
-              <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <span className="text-gray-400">24H Volume</span>
+
                 <span className="font-semibold">
-                  ₹ {coin.market_data.total_volume.inr.toLocaleString()}
+                  ₹ {marketData?.total_volume?.inr?.toLocaleString("en-IN")}
                 </span>
               </div>
 
               {/* Circulating Supply */}
-              <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <span className="text-gray-400">Circulating Supply</span>
+
                 <span className="font-semibold">
-                  {coin.market_data.circulating_supply.toLocaleString()}{" "}
-                  {coin.symbol.toUpperCase()}
+                  {marketData?.circulating_supply?.toLocaleString("en-IN")}{" "}
+                  {coin.symbol?.toUpperCase()}
                 </span>
               </div>
 
               {/* Total Supply */}
-              <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <span className="text-gray-400">Total Supply</span>
+
                 <span className="font-semibold">
-                  {coin.market_data.total_supply
-                    ? `${coin.market_data.total_supply.toLocaleString()} ${coin.symbol.toUpperCase()}`
+                  {marketData?.total_supply
+                    ? `${marketData.total_supply.toLocaleString(
+                        "en-IN",
+                      )} ${coin.symbol?.toUpperCase()}`
                     : "N/A"}
                 </span>
               </div>
 
               {/* Max Supply */}
-              <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <span className="text-gray-400">Max Supply</span>
+
                 <span className="font-semibold">
-                  {coin.market_data.max_supply
-                    ? `${coin.market_data.max_supply.toLocaleString()} ${coin.symbol.toUpperCase()}`
+                  {marketData?.max_supply
+                    ? `${marketData.max_supply.toLocaleString(
+                        "en-IN",
+                      )} ${coin.symbol?.toUpperCase()}`
                     : "Unlimited"}
                 </span>
               </div>
 
               {/* Fully Diluted Valuation */}
-              <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <span className="text-gray-400">Fully Diluted Valuation</span>
+
                 <span className="font-semibold">
-                  {coin.market_data.fully_diluted_valuation?.inr
-                    ? `₹ ${coin.market_data.fully_diluted_valuation.inr.toLocaleString()}`
+                  {marketData?.fully_diluted_valuation?.inr
+                    ? `₹ ${marketData.fully_diluted_valuation.inr.toLocaleString(
+                        "en-IN",
+                      )}`
                     : "N/A"}
                 </span>
               </div>
 
-              {/* 24H High */}
-              {/* <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                <span className="text-gray-400">24H High</span>
-                <span className="font-semibold text-green-500">
-                  ₹ {coin.market_data.high_24h.inr.toLocaleString()}
-                </span>
-              </div> */}
-
-              {/* 24H Low */}
-              {/* <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                <span className="text-gray-400">24H Low</span>
-                <span className="font-semibold text-red-500">
-                  ₹ {coin.market_data.low_24h.inr.toLocaleString()}
-                </span>
-              </div> */}
-
-              {/* All Time High */}
-              <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              {/* ATH */}
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <span className="text-gray-400">All-Time High (ATH)</span>
+
                 <span className="font-semibold text-green-500">
-                  ₹ {coin.market_data.ath.inr.toLocaleString()}
+                  ₹ {marketData?.ath?.inr?.toLocaleString("en-IN")}
                 </span>
               </div>
 
-              {/* ATH Date */}
-              {/* <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                <span className="text-gray-400">ATH Date</span>
-                <span className="font-semibold">
-                  {new Date(coin.market_data.ath_date.inr).toLocaleDateString()}
-                </span>
-              </div> */}
-
-              {/* All Time Low */}
-              <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              {/* ATL */}
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <span className="text-gray-400">All-Time Low (ATL)</span>
+
                 <span className="font-semibold text-red-500">
-                  ₹ {coin.market_data.atl.inr.toLocaleString()}
+                  ₹ {marketData?.atl?.inr?.toLocaleString("en-IN")}
                 </span>
               </div>
-
-              {/* ATL Date */}
-              {/* <div className="flex justify-between items-center">
-                <span className="text-gray-400">ATL Date</span>
-                <span className="font-semibold">
-                  {new Date(coin.market_data.atl_date.inr).toLocaleDateString()}
-                </span>
-              </div> */}
             </div>
           </div>
+        </div>
+
+        {/* ==================================================
+            DESCRIPTION
+        ================================================== */}
+
+        <div className="mt-10">
+          <span className="text-3xl font-bold">Description</span>
+
+          <p className="mt-5 text-lg text-gray-400">
+            {readMore
+              ? description
+              : `${description.slice(0, 300)}${
+                  description.length > 300 ? "..." : ""
+                }`}
+
+            {description.length > 300 && (
+              <button
+                type="button"
+                className="ml-2 text-white hover:underline"
+                onClick={() => setReadMore((prev) => !prev)}
+              >
+                {readMore ? "Read Less" : "Read More"}
+              </button>
+            )}
+          </p>
+        </div>
+
+        {/* ==================================================
+            OFFICIAL LINKS
+        ================================================== */}
+
+        <div className="mt-10">
+          <h2 className="mb-4 text-3xl font-bold">Official Links</h2>
+
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-2">
+            {/* Website */}
+            {coin?.links?.homepage?.[0] && (
+              <a
+                href={coin.links.homepage[0]}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-between rounded-xl bg-[#1f2937] p-5 transition-all duration-300 hover:bg-[#FE4136]"
+              >
+                <div className="flex items-center gap-4">
+                  <FaGlobe size={24} />
+
+                  <span className="font-semibold">Website</span>
+                </div>
+
+                <BsBoxArrowUpRight className="transition-all group-hover:rotate-45" />
+              </a>
+            )}
+
+            {/* Whitepaper */}
+            {coin?.links?.whitepaper && (
+              <a
+                href={coin.links.whitepaper}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-between rounded-xl bg-[#1f2937] p-5 transition-all duration-300 hover:bg-[#FE4136]"
+              >
+                <div className="flex items-center gap-4">
+                  <HiDocumentText size={24} />
+
+                  <span className="font-semibold">Whitepaper</span>
+                </div>
+
+                <BsBoxArrowUpRight className="transition-all group-hover:rotate-45" />
+              </a>
+            )}
+
+            {/* Twitter / X */}
+            {coin?.links?.twitter_screen_name && (
+              <a
+                href={`https://x.com/${coin.links.twitter_screen_name}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-between rounded-xl bg-[#1f2937] p-5 transition-all duration-300 hover:bg-[#FE4136]"
+              >
+                <div className="flex items-center gap-4">
+                  <SiX size={22} />
+
+                  <span className="font-semibold">Twitter / X</span>
+                </div>
+
+                <BsBoxArrowUpRight className="transition-all group-hover:rotate-45" />
+              </a>
+            )}
+
+            {/* Reddit */}
+            {coin?.links?.subreddit_url && (
+              <a
+                href={coin.links.subreddit_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-between rounded-xl bg-[#1f2937] p-5 transition-all duration-300 hover:bg-[#FE4136]"
+              >
+                <div className="flex items-center gap-4">
+                  <FaReddit size={24} />
+
+                  <span className="font-semibold">Reddit</span>
+                </div>
+
+                <BsBoxArrowUpRight className="transition-all group-hover:rotate-45" />
+              </a>
+            )}
+
+            {/* Discord */}
+            {coin?.links?.chat_url?.[0] && (
+              <a
+                href={coin.links.chat_url[0]}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-between rounded-xl bg-[#1f2937] p-5 transition-all duration-300 hover:bg-[#FE4136]"
+              >
+                <div className="flex items-center gap-4">
+                  <FaDiscord size={24} />
+
+                  <span className="font-semibold">Discord</span>
+                </div>
+
+                <BsBoxArrowUpRight className="transition-all group-hover:rotate-45" />
+              </a>
+            )}
+
+            {/* Explorer */}
+            {coin?.links?.blockchain_site?.[0] && (
+              <a
+                href={coin.links.blockchain_site[0]}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-between rounded-xl bg-[#1f2937] p-5 transition-all duration-300 hover:bg-[#FE4136]"
+              >
+                <div className="flex items-center gap-4">
+                  <FaGlobe size={24} />
+
+                  <span className="font-semibold">Explorer</span>
+                </div>
+
+                <BsBoxArrowUpRight className="transition-all group-hover:rotate-45" />
+              </a>
+            )}
+
+            {/* GitHub */}
+            {coin?.links?.repos_url?.github?.[0] && (
+              <a
+                href={coin.links.repos_url.github[0]}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-between rounded-xl bg-[#1f2937] p-5 transition-all duration-300 hover:bg-[#FE4136]"
+              >
+                <div className="flex items-center gap-4">
+                  <FaGithub size={24} />
+
+                  <span className="font-semibold">GitHub</span>
+                </div>
+
+                <BsBoxArrowUpRight className="transition-all group-hover:rotate-45" />
+              </a>
+            )}
           </div>
+        </div>
+        {/* ==================================================
+            TRADE SECTION
+        ================================================== */}
 
-          {/* Description */}
-
-          <div className="mt-10">
-            <span className="text-3xl font-bold">Description</span>
-            <p className="text-lg text-gray-400 mt-5">{readMore? coin.description.en : coin.description.en.slice(0, 300) + "..."} <button className="hover:underline text-white" onClick={()=>setReadMore(!readMore)}>{readMore ? "Read Less": "Read More" }</button></p>
-
-          </div>
-          {/* official links */}
-
-          <div className="mt-10 ">
-            <h2 className="text-3xl font-bold mb-4">Official Links</h2>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-5">
-              {/* Website */}
-
-              {coin.links.homepage[0] && (
-                <a
-                  href={coin.links.homepage[0]}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between p-5 rounded-xl bg-[#1f2937] hover:bg-[#FE4136] transition-all duration-300 group"
-                >
-                  <div className="flex items-center gap-4">
-                    <FaGlobe size={24} />
-                    <span className="font-semibold">Website</span>
-                  </div>
-
-                  <BsBoxArrowUpRight className="group-hover:rotate-45 transition-all" />
-                </a>
-              )}
-
-              {/* Whitepaper */}
-
-              {coin.links.whitepaper && (
-                <a
-                  href={coin.links.whitepaper}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between p-5 rounded-xl bg-[#1f2937] hover:bg-[#FE4136] transition-all duration-300 group"
-                >
-                  <div className="flex items-center gap-4">
-                    <HiDocumentText size={24} />
-                    <span className="font-semibold">Whitepaper</span>
-                  </div>
-
-                  <BsBoxArrowUpRight className="group-hover:rotate-45 transition-all" />
-                </a>
-              )}
-
-              {/* Twitter / X */}
-
-              {coin.links.twitter_screen_name && (
-                <a
-                  href={`https://x.com/${coin.links.twitter_screen_name}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between p-5 rounded-xl bg-[#1f2937] hover:bg-[#FE4136] transition-all duration-300 group"
-                >
-                  <div className="flex items-center gap-4">
-                    <SiX size={22} />
-                    <span className="font-semibold">Twitter / X</span>
-                  </div>
-
-                  <BsBoxArrowUpRight className="group-hover:rotate-45 transition-all" />
-                </a>
-              )}
-
-              {/* Reddit */}
-
-              {coin.links.subreddit_url && (
-                <a
-                  href={coin.links.subreddit_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between p-5 rounded-xl bg-[#1f2937] hover:bg-[#FE4136] transition-all duration-300 group"
-                >
-                  <div className="flex items-center gap-4">
-                    <FaReddit size={24} />
-                    <span className="font-semibold">Reddit</span>
-                  </div>
-
-                  <BsBoxArrowUpRight className="group-hover:rotate-45 transition-all" />
-                </a>
-              )}
-
-              {/* Discord */}
-
-              {coin.links.chat_url[0] && (
-                <a
-                  href={coin.links.chat_url[0]}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between p-5 rounded-xl bg-[#1f2937] hover:bg-[#FE4136] transition-all duration-300 group"
-                >
-                  <div className="flex items-center gap-4">
-                    <FaDiscord size={24} />
-                    <span className="font-semibold">Discord</span>
-                  </div>
-
-                  <BsBoxArrowUpRight className="group-hover:rotate-45 transition-all" />
-                </a>
-              )}
-
-              {/* Explorer */}
-
-              {coin.links.blockchain_site[0] && (
-                <a
-                  href={coin.links.blockchain_site[0]}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between p-5 rounded-xl bg-[#1f2937] hover:bg-[#FE4136] transition-all duration-300 group"
-                >
-                  <div className="flex items-center gap-4">
-                    <FaGlobe size={24} />
-                    <span className="font-semibold">Explorer</span>
-                  </div>
-
-                  <BsBoxArrowUpRight className="group-hover:rotate-45 transition-all" />
-                </a>
-              )}
-
-              {/* GitHub */}
-
-              {coin.links.repos_url.github[0] && (
-                <a
-                  href={coin.links.repos_url.github[0]}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between p-5 rounded-xl bg-[#1f2937] hover:bg-[#FE4136] transition-all duration-300 group"
-                >
-                  <div className="flex items-center gap-4">
-                    <FaGithub size={24} />
-                    <span className="font-semibold">GitHub</span>
-                  </div>
-
-                  <BsBoxArrowUpRight className="group-hover:rotate-45 transition-all" />
-                </a>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-10 mx-auto text-center md:text-left">
-  <h2 className="text-3xl md:text-4xl font-bold text-white">
-    <span className="text-red-500">Trade</span> Here
-  </h2>
-
-  <p className="text-gray-400 mt-3 max-w-3xl leading-7">
-    Nexora does not provide cryptocurrency trading services. However, you can
-    explore the trusted exchanges below to buy, sell, and trade cryptocurrencies
-    securely.
-  </p>
-</div>
-
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
-  {exchanges.map((item) => (
-    <div
-      key={item.id}
-      className="bg-[#0B1120] border border-slate-700 rounded-2xl p-6 hover:border-[#FE4136] hover:shadow-lg hover:shadow-[#FE4136]/20 transition-all duration-300"
-    >
-      {/* Logo */}
-      <div className="flex justify-center">
-        <img
-          src={item.logo}
-          alt={item.name}
-          className="w-16 h-16 object-contain"
-        />
-      </div>
-
-      {/* Exchange Name */}
-      <h2 className="text-white text-xl font-bold text-center mt-5">
-        {item.name}
-      </h2>
-
-      {/* Description */}
-      <p className="text-gray-400 text-sm text-center mt-3 leading-6">
-        {item.desc}
-      </p>
-
-      {/* Button */}
-      <a
-        href={item.link}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-6 flex items-center justify-center gap-2 bg-[#FE4136] hover:bg-[#e63a30] text-white font-semibold py-3 rounded-xl transition"
-      >
-        Trade Now →
-      </a>
-    </div>
-  ))}
-</div>
-
-<div
-          className="  w-full
-          mx-auto
-          border-2
-          border-white/20
-          hover:border-[#FE4136]/30
-          rounded-[30px]
-          p-6 md:p-8
-          mt-14
-          text-center
-          md:text-left
-          shadow-[0_0_30px_rgba(254,65,54,0.08)]
-          transition-all
-          duration-500 group"
-        >
-          <h2
-            className="flex
-        items-center
-        justify-center
-        md:justify-start
-        gap-2
-        text-xl
-        md:text-2xl
-        font-semibold
-        text-[#FE4136]
-        mb-4"
-          >
-            Important Risk Warning <FiAlertOctagon className="mt-1 group-hover:animate-pulse" />
+        <div className="mx-auto mt-10 text-center md:text-left">
+          <h2 className="text-3xl font-bold text-white md:text-4xl">
+            <span className="text-red-500">Trade</span> Here
           </h2>
 
-          <p className="text-gray-300 leading-8">
+          <p className="mt-3 max-w-3xl leading-7 text-gray-400">
+            Nexora does not provide cryptocurrency trading services. However,
+            you can explore the trusted exchanges below to buy, sell, and trade
+            cryptocurrencies securely.
+          </p>
+        </div>
+
+        {/* ==================================================
+            EXCHANGE CARDS
+        ================================================== */}
+
+        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {exchanges.map((item) => (
+            <div
+              key={item.id}
+              className="rounded-2xl border border-slate-700 bg-[#0B1120] p-6 transition-all duration-300 hover:border-[#FE4136] hover:shadow-lg hover:shadow-[#FE4136]/20"
+            >
+              {/* Logo */}
+              <div className="flex justify-center">
+                <img
+                  src={item.logo}
+                  alt={item.name}
+                  className="h-16 w-16 object-contain"
+                  loading="lazy"
+                />
+              </div>
+
+              {/* Exchange Name */}
+              <h2 className="mt-5 text-center text-xl font-bold text-white">
+                {item.name}
+              </h2>
+
+              {/* Description */}
+              <p className="mt-3 text-center text-sm leading-6 text-gray-400">
+                {item.desc}
+              </p>
+
+              {/* Trade Button */}
+              <a
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-[#FE4136] py-3 font-semibold text-white transition hover:bg-[#e63a30]"
+              >
+                Trade Now →
+              </a>
+            </div>
+          ))}
+        </div>
+
+        {/* ==================================================
+            RISK WARNING
+        ================================================== */}
+
+        <div className="group mx-auto mt-14 w-full rounded-[30px] border-2 border-white/20 p-6 text-center shadow-[0_0_30px_rgba(254,65,54,0.08)] transition-all duration-500 hover:border-[#FE4136]/30 md:p-8 md:text-left">
+          <h2 className="mb-4 flex items-center justify-center gap-2 text-xl font-semibold text-[#FE4136] md:justify-start md:text-2xl">
+            Important Risk Warning
+            <FiAlertOctagon className="mt-1 group-hover:animate-pulse" />
+          </h2>
+
+          <p className="leading-8 text-gray-300">
             Cryptocurrency investments are highly volatile and involve
             significant financial risk. Never invest money you cannot afford to
             lose. Always research carefully before making investment decisions.
           </p>
-        </div>
         </div>
       </div>
     </motion.div>

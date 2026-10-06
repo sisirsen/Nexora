@@ -13,12 +13,15 @@ function Navbar() {
     { id: 4, item: "Contact", path: "/contact" },
     { id: 5, item: "About Us", path: "/about" },
     { id: 6, item: "Learning Hub", path: "learn" },
-     { id: 7, item: "Premium", path: "/premium", icon: <FiLock className="text-yellow-400 text-lg"/> },
+    {
+      id: 7,
+      item: "Premium",
+      path: "/premium",
+      icon: <FiLock className="text-yellow-400 text-lg" />,
+    },
   ];
 
-  // const [dark, setDark] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
-
 
   return (
     <>
@@ -50,25 +53,9 @@ function Navbar() {
               </NavLink>
             ))}
           </div>
-         
-
-          
-          
 
           {/* Right Section */}
           <div className="flex items-center gap-4">
-            {/* Dark Mode */}      
-            {/* <button
-              onClick={() => setDark(!dark)}
-              className="text-xl text-white"
-            >
-              {dark ? (
-                <FaMoon className="text-yellow-500" />
-              ) : (
-                <FiSun className="text-yellow-500" />
-              )}
-            </button> */}
-
             {/* Desktop Buttons */}
             <div className="hidden lg:flex gap-3">
               <NavLink

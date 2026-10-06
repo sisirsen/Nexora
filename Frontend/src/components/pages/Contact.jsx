@@ -1,4 +1,4 @@
-import { React, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { FiArrowRight, FiPhone, FiMail } from "react-icons/fi";
 import { HiOutlineLocationMarker } from "react-icons/hi";
 import { BsChatDots } from "react-icons/bs";
@@ -6,9 +6,123 @@ import { motion } from "framer-motion";
 import { NavLink } from "react-router-dom";
 
 function Contact() {
+  const [pageLoading, setPageLoading] = useState(
+    !sessionStorage.getItem("contact_visited"),
+  );
+
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    if (!sessionStorage.getItem("contact_visited")) {
+      const timer = setTimeout(() => {
+        sessionStorage.setItem("contact_visited", "true");
+        setPageLoading(false);
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
   }, []);
+
+  if (pageLoading) {
+    return <ContactSkeleton />;
+  }
+
+  function ContactSkeleton() {
+    return (
+      <div className="min-h-screen animate-pulse px-6 py-25 md:px-10 md:py-30">
+        {/* Header */}
+        <div className="flex flex-col items-center">
+          <div className="h-10 w-64 rounded-lg bg-gray-800 md:h-14 md:w-80" />
+
+          <div className="mt-6 h-4 w-full max-w-[700px] rounded bg-gray-800" />
+          <div className="mt-2 h-4 w-4/5 max-w-[550px] rounded bg-gray-800" />
+        </div>
+
+        {/* Support Cards */}
+        <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
+          {[1, 2, 3].map((item) => (
+            <div
+              key={item}
+              className="h-36 rounded-2xl border border-white/5 bg-gray-800/60 p-6"
+            >
+              <div className="h-6 w-32 rounded bg-gray-700" />
+              <div className="mt-4 h-4 w-full rounded bg-gray-700" />
+              <div className="mt-2 h-4 w-4/5 rounded bg-gray-700" />
+            </div>
+          ))}
+        </div>
+
+        {/* Why Contact */}
+        <div className="mt-16">
+          <div className="mx-auto h-4 w-40 rounded bg-gray-800" />
+
+          <div className="mx-auto mt-5 h-8 w-72 rounded bg-gray-800 md:h-10 md:w-96" />
+
+          <div className="mx-auto mt-4 h-4 w-full max-w-4xl rounded bg-gray-800" />
+        </div>
+
+        {/* Contact Cards */}
+        <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-4">
+          {[1, 2, 3, 4].map((item) => (
+            <div key={item} className="h-40 rounded-[30px] bg-gray-800/60 p-8">
+              <div className="h-8 w-8 rounded bg-gray-700" />
+              <div className="mt-5 h-5 w-32 rounded bg-gray-700" />
+              <div className="mt-3 h-4 w-full rounded bg-gray-700" />
+            </div>
+          ))}
+        </div>
+
+        {/* Message Form */}
+        <div className="mt-16 md:mt-20">
+          <div className="rounded-[30px] bg-gray-800/50 p-5 md:p-10">
+            <div className="h-8 w-72 rounded bg-gray-700 md:h-10 md:w-96" />
+
+            <div className="mt-8 space-y-5">
+              <div className="h-14 w-full rounded-xl bg-gray-700" />
+              <div className="h-14 w-full rounded-xl bg-gray-700" />
+              <div className="h-14 w-full rounded-xl bg-gray-700" />
+              <div className="h-36 w-full rounded-xl bg-gray-700" />
+
+              <div className="h-12 w-36 rounded-3xl bg-gray-700" />
+            </div>
+          </div>
+        </div>
+
+        {/* FAQ */}
+        <div className="mt-16 md:mt-20">
+          <div className="mx-auto h-4 w-20 rounded bg-gray-800" />
+
+          <div className="mx-auto mt-5 h-8 w-80 rounded bg-gray-800 md:h-10 md:w-[420px]" />
+
+          <div className="mt-10 space-y-5">
+            {[1, 2, 3, 4].map((item) => (
+              <div key={item} className="rounded-2xl bg-gray-800/60 p-7">
+                <div className="h-5 w-3/5 rounded bg-gray-700" />
+                <div className="mt-4 h-4 w-full rounded bg-gray-700" />
+                <div className="mt-2 h-4 w-4/5 rounded bg-gray-700" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Final CTA */}
+        <div className="mt-16 md:mt-20">
+          <div className="rounded-[35px] bg-gray-800/60 p-8 md:p-14">
+            <div className="h-4 w-44 rounded bg-gray-700" />
+
+            <div className="mt-5 h-10 w-full max-w-2xl rounded bg-gray-700" />
+
+            <div className="mt-6 space-y-2">
+              <div className="h-4 w-full max-w-2xl rounded bg-gray-700" />
+              <div className="h-4 w-5/6 max-w-xl rounded bg-gray-700" />
+            </div>
+
+            <div className="mt-8 h-12 w-44 rounded-full bg-gray-700" />
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -29,8 +143,7 @@ function Contact() {
         </div>
 
         <div className="mt-5 md:mt-5">
-          <div className="text-3xl text-white font-semibold md:mb-10 flex justify-center">
-          </div>
+          <div className="text-3xl text-white font-semibold md:mb-10 flex justify-center"></div>
           <div className="space-y-3 md:flex justify-between">
             <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 hover:border-[#FE4136] transition-all duration-500">
               <h2 className="text-xl font-bold text-white">Fast Support</h2>
@@ -111,10 +224,7 @@ function Contact() {
 
         {/* connect with us */}
 
-        
-
         <div className="mt-10 md:mt-20 bg-[#18181A] p-5 md:p-10 rounded-4xl border border-white/5 hover:shadow-[0_0_50px_#FE413630] transition-all duration-500">
-          
           <div className="text-center md:text-left mb-5 md:mb-10">
             <span className="text-white text-2xl md:text-4xl font-bold ">
               <span className="text-red-500 ">Connect</span> To Us
@@ -197,9 +307,9 @@ function Contact() {
 
               <div className="flex justify-center md:justify-normal w-full">
                 <button className="bg-[#FE4136] px-8 py-4 rounded-3xl text-white flex items-center gap-3 hover:scale-105 transition-all duration-300">
-                Send Message
-                <FiArrowRight />
-              </button>
+                  Send Message
+                  <FiArrowRight />
+                </button>
               </div>
             </div>
           </form>
@@ -207,7 +317,9 @@ function Contact() {
 
         <div className="mt-10 md:mt-20">
           <div className="text-center">
-            <span className="text-[#FE4136] uppercase tracking-[3px] animate-pulse">FAQ</span>
+            <span className="text-[#FE4136] uppercase tracking-[3px] animate-pulse">
+              FAQ
+            </span>
 
             <h2 className="text-white text-2xl md:text-4xl font-bold mt-4">
               Frequently Asked <span className="text-red-500">Questions</span>

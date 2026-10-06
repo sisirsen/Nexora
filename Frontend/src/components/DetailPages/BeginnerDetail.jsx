@@ -3,7 +3,7 @@ import { FiSearch, FiArrowRight } from "react-icons/fi";
 import { Link, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import {icon} from "../../assets/images";
+import { icon } from "../../assets/images";
 
 const BeginnerDetail = () => {
   const [VisibleTopics, setVisibleTopics] = useState(10);

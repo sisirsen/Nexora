@@ -1,14 +1,228 @@
 import React from "react";
-import { FaPlayCircle, FaArrowRight} from "react-icons/fa";
+import { FaPlayCircle, FaArrowRight } from "react-icons/fa";
 import { FiArrowRight } from "react-icons/fi";
 import { icon } from "../../assets/images";
 import { motion } from "framer-motion";
-import { NavLink,Link } from "react-router-dom";
-import { button, div, img } from "framer-motion/client";
-import { useEffect } from "react";
+import { NavLink, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 function LearningHub() {
-  
+  const [pageLoading, setPageLoading] = useState(
+    !sessionStorage.getItem("learn_visited"),
+  );
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+
+    if (!sessionStorage.getItem("learn_visited")) {
+      const timer = setTimeout(() => {
+        sessionStorage.setItem("learn_visited", "true");
+        setPageLoading(false);
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  if (pageLoading) {
+    return <LearningSkeleton />;
+  }
+
+  function LearningSkeleton() {
+    return (
+      <div className="min-h-screen animate-pulse bg-[#020617] px-5 py-20 text-white md:px-10 md:py-35">
+        {/* ================= HERO ================= */}
+        <section className="grid items-center gap-10 md:grid-cols-2">
+          {/* Left */}
+          <div className="space-y-6">
+            <div className="mx-auto h-12 w-full max-w-[650px] rounded-lg bg-gray-800 md:mx-0" />
+
+            <div className="space-y-3">
+              <div className="h-4 w-full max-w-[550px] rounded bg-gray-800" />
+              <div className="h-4 w-5/6 max-w-[500px] rounded bg-gray-800" />
+              <div className="h-4 w-4/6 max-w-[400px] rounded bg-gray-800" />
+            </div>
+
+            <div className="h-12 w-40 rounded-xl bg-gray-800" />
+          </div>
+
+          {/* Image */}
+          <div className="flex justify-center">
+            <div className="h-[280px] w-full max-w-[550px] rounded-[30px] bg-gray-800 sm:h-[350px] md:h-[400px]" />
+          </div>
+        </section>
+
+        {/* ================= WHAT WE PROVIDE ================= */}
+        <section className="mt-16 md:mt-30">
+          <div className="mx-auto h-10 w-64 rounded-lg bg-gray-800" />
+
+          <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-10">
+            {[1, 2].map((item) => (
+              <div key={item} className="h-48 rounded-3xl bg-gray-800 p-8">
+                <div className="h-8 w-48 rounded bg-gray-700" />
+
+                <div className="mt-6 space-y-3">
+                  <div className="h-4 w-3/4 rounded bg-gray-700" />
+                  <div className="h-4 w-2/3 rounded bg-gray-700" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ================= ROADMAP HEADING ================= */}
+        <section className="mt-16 md:mt-20">
+          <div className="mx-auto h-10 w-80 rounded-lg bg-gray-800" />
+
+          <div className="mx-auto mt-5 h-4 w-full max-w-2xl rounded bg-gray-800" />
+        </section>
+
+        {/* ================= BEGINNER ================= */}
+        <section className="mt-12 md:mt-16">
+          <div className="flex flex-col items-center justify-between gap-5 md:flex-row">
+            <div className="h-14 w-64 rounded-2xl bg-gray-800" />
+            <div className="h-12 w-28 rounded-xl bg-gray-800" />
+          </div>
+
+          <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-4">
+            {[1, 2, 3, 4].map((item) => (
+              <div
+                key={item}
+                className="h-[480px] overflow-hidden rounded-xl bg-gray-800"
+              >
+                <div className="h-[200px] bg-gray-700" />
+
+                <div className="space-y-4 p-5">
+                  <div className="h-6 w-4/5 rounded bg-gray-700" />
+
+                  <div className="space-y-2">
+                    <div className="h-3 w-full rounded bg-gray-700" />
+                    <div className="h-3 w-5/6 rounded bg-gray-700" />
+                    <div className="h-3 w-4/6 rounded bg-gray-700" />
+                  </div>
+
+                  <div className="h-4 w-20 rounded bg-gray-700" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ================= INTERMEDIATE ================= */}
+        <section className="mt-16 md:mt-30">
+          <div className="flex flex-col items-center justify-between gap-5 md:flex-row">
+            <div className="h-14 w-72 rounded-2xl bg-gray-800" />
+            <div className="h-12 w-28 rounded-xl bg-gray-800" />
+          </div>
+
+          <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-4">
+            {[1, 2, 3, 4].map((item) => (
+              <div
+                key={item}
+                className="h-[550px] overflow-hidden rounded-xl bg-gray-800"
+              >
+                <div className="h-[200px] bg-gray-700" />
+
+                <div className="space-y-4 p-5">
+                  <div className="h-6 w-4/5 rounded bg-gray-700" />
+
+                  <div className="space-y-2">
+                    <div className="h-3 w-full rounded bg-gray-700" />
+                    <div className="h-3 w-5/6 rounded bg-gray-700" />
+                    <div className="h-3 w-4/6 rounded bg-gray-700" />
+                  </div>
+
+                  <div className="h-4 w-20 rounded bg-gray-700" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ================= ADVANCED ================= */}
+        <section className="mt-16 md:mt-20">
+          <div className="flex flex-col items-center justify-between gap-5 md:flex-row">
+            <div className="h-14 w-64 rounded-2xl bg-gray-800" />
+            <div className="h-12 w-28 rounded-xl bg-gray-800" />
+          </div>
+
+          <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-4">
+            {[1, 2, 3, 4].map((item) => (
+              <div
+                key={item}
+                className="h-[530px] overflow-hidden rounded-xl bg-gray-800"
+              >
+                <div className="h-[200px] bg-gray-700" />
+
+                <div className="space-y-4 p-5">
+                  <div className="h-6 w-4/5 rounded bg-gray-700" />
+
+                  <div className="space-y-2">
+                    <div className="h-3 w-full rounded bg-gray-700" />
+                    <div className="h-3 w-5/6 rounded bg-gray-700" />
+                    <div className="h-3 w-4/6 rounded bg-gray-700" />
+                  </div>
+
+                  <div className="h-4 w-20 rounded bg-gray-700" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ================= VIDEOS ================= */}
+        <section className="mt-16 md:mt-20">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="h-10 w-80 rounded-lg bg-gray-800" />
+
+              <div className="mt-4 h-4 w-[500px] max-w-full rounded bg-gray-800" />
+            </div>
+
+            <div className="h-12 w-28 rounded-xl bg-gray-800" />
+          </div>
+
+          <div className="mt-14 grid grid-cols-1 gap-8 md:grid-cols-3">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="overflow-hidden rounded-2xl bg-gray-800"
+              >
+                <div className="h-[250px] bg-gray-700" />
+
+                <div className="space-y-4 p-7">
+                  <div className="h-6 w-4/5 rounded bg-gray-700" />
+
+                  <div className="h-4 w-2/5 rounded bg-gray-700" />
+
+                  <div className="h-4 w-32 rounded bg-gray-700" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ================= BOTTOM CTA ================= */}
+        <section className="mt-16 md:mt-20">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+            {[1, 2].map((item) => (
+              <div key={item} className="rounded-[35px] bg-gray-800 p-10">
+                <div className="h-10 w-3/4 rounded bg-gray-700" />
+
+                <div className="mt-6 space-y-3">
+                  <div className="h-4 w-full rounded bg-gray-700" />
+                  <div className="h-4 w-5/6 rounded bg-gray-700" />
+                  <div className="h-4 w-4/6 rounded bg-gray-700" />
+                </div>
+
+                <div className="mt-8 h-12 w-40 rounded-full bg-gray-700" />
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   const beginnerCard = [
     {
@@ -116,54 +330,44 @@ function LearningHub() {
     {
       title: "Crypto For Beginners",
       creator: "Neeraj Joshi",
-      link: 'https://www.youtube.com/watch?v=hnS5sjqXXIc',
-      image:
-        icon.crypvid,
+      link: "https://www.youtube.com/watch?v=hnS5sjqXXIc",
+      image: icon.crypvid,
     },
     {
       title: "Candlestick Patterns",
       creator: "The Trading Channel",
-      link:'https://www.youtube.com/watch?v=eynxyoKgpng', 
-      image:
-        icon.candel,
+      link: "https://www.youtube.com/watch?v=eynxyoKgpng",
+      image: icon.candel,
     },
     {
       title: "Support & Resistance",
       creator: "Pushkar Raj Thakur",
-     link:'https://youtu.be/r2LzjTUs3lo',
-      
-      image:
-        icon.sandr,
+      link: "https://youtu.be/r2LzjTUs3lo",
+
+      image: icon.sandr,
     },
     {
       title: "Risk Management",
       creator: "Pushkar Raj Thakur",
-     link:'https://youtu.be/s7KApswForA',
-      
-      image:
-        icon.risk,
+      link: "https://youtu.be/s7KApswForA",
+
+      image: icon.risk,
     },
     {
       title: "Trading Psychology",
       creator: "Pushkar Raj Thakur",
-     link:'https://youtu.be/whe0B7hJJJ0',
-      
-      image:
-        icon.psycotrade,
+      link: "https://youtu.be/whe0B7hJJJ0",
+
+      image: icon.psycotrade,
     },
     {
       title: "Market Structure / Price Action",
       creator: "Pushkar Raj Thakur",
-     link:'https://youtu.be/aE9HrZT3Dmk',
-      
-      image:
-        icon.marketstructure,
+      link: "https://youtu.be/aE9HrZT3Dmk",
+
+      image: icon.marketstructure,
     },
   ];
-
-  useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [])
 
   return (
     <motion.div
@@ -206,7 +410,6 @@ function LearningHub() {
             />
           </div>
         </section>
-
 
         {/*what we provide */}
 
@@ -252,70 +455,29 @@ function LearningHub() {
             </p>
           </div>
 
-
-            {/* beginner */}
-
+          {/* beginner */}
 
           <div className="mt-15 md:mt-15">
             <div className="md:flex justify-between items-center text-center md:text-left">
               <span className="text-[#FE4136] py-4 px-22 md:py-4 md:px-4 bg-[#111111] text-2xl md:text-3xl rounded-2xl border border-white/10 font-semibold hover:border-[#FE4136] transition-all duration-500 ">
                 Level: <span className="text-white ">Beginner</span>
               </span>
-              <Link to='beginnerDetail' className="md:mt-0 mt-10 border-2 border-white/10 py-4 md:px-6 md:py-3  rounded-xl hover:border-[#FE4136] transition-all duration-300 cursor-pointer flex items-center justify-center">
-                    View All 
-                  </Link>
+              <Link
+                to="beginnerDetail"
+                className="md:mt-0 mt-10 border-2 border-white/10 py-4 md:px-6 md:py-3  rounded-xl hover:border-[#FE4136] transition-all duration-300 cursor-pointer flex items-center justify-center"
+              >
+                View All
+              </Link>
             </div>
 
             <div>
               <div>
                 <div className="grid grid-cols-1 md:grid-cols-4 place-items-center gap-5 mt-10 md:mt-15  ">
                   {beginnerCard.map((items) => (
-                    <div key={items.id} className="bg-[#111111] rounded-xl w-[320px] h-[480px] overflow-hidden">
-                      <div  className="h-[200px] w-full overflow-hidden">
-                        <img
-                          src={items.picture}
-                          alt={items.title}
-                          className="h-full w-full object-cover transition-all duration-500 hover:scale-110"
-                        />
-                      </div>
-
-                      {/* Text Container */}
-                      <div className="p-5">
-                        <h2 className="text-white text-xl font-semibold">
-                          {items.title}
-                        </h2>
-
-                        <p className="text-gray-400 mt-3">{items.ans}</p>
-
-                        <div className="mt-2 text-[#FE4136] ">
-                          <button className="hover:underline underline-offset-4 cursor-pointer">
-                            {items.button}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                
-              </div>
-            </div>
-          </div>
-{/* intermediate */}
-          <div className="mt-15 md:mt-30 ">
-            <div className="md:flex justify-between text-center">
-              <span className="text-[#FE4136] md:px-4 md:py-4 px-16 py-4 bg-[#111111] text-2xl md:text-3xl rounded-2xl border border-white/10 font-semibold hover:border-[#FE4136] transition-all duration-500">
-                Level: <span className="text-white ">Intermediate</span>
-              </span>
-              <Link to='intermediateDetail' className="mt-10 md:mt-0 border-2 border-white/10 px-6 h-[55px] rounded-xl hover:border-[#FE4136] transition-all duration-300 cursor-pointer flex justify-center items-center">
-                    View All 
-                  </Link>
-            </div>
-
-            
-                <div className="grid grid-cols-1 md:grid-cols-4 mt-10 place-items-center gap-5 ">
-                  {interCard.map((items) => (
-                    <div key={items.id} className="bg-[#111111] rounded-xl w-[320px] h-[550px] overflow-hidden">
+                    <div
+                      key={items.id}
+                      className="bg-[#111111] rounded-xl w-[320px] h-[480px] overflow-hidden"
+                    >
                       <div className="h-[200px] w-full overflow-hidden">
                         <img
                           src={items.picture}
@@ -341,26 +503,77 @@ function LearningHub() {
                     </div>
                   ))}
                 </div>
-
-                
-              
+              </div>
+            </div>
           </div>
-{/* Advanced */}
+          {/* intermediate */}
+          <div className="mt-15 md:mt-30 ">
+            <div className="md:flex justify-between text-center">
+              <span className="text-[#FE4136] md:px-4 md:py-4 px-16 py-4 bg-[#111111] text-2xl md:text-3xl rounded-2xl border border-white/10 font-semibold hover:border-[#FE4136] transition-all duration-500">
+                Level: <span className="text-white ">Intermediate</span>
+              </span>
+              <Link
+                to="intermediateDetail"
+                className="mt-10 md:mt-0 border-2 border-white/10 px-6 h-[55px] rounded-xl hover:border-[#FE4136] transition-all duration-300 cursor-pointer flex justify-center items-center"
+              >
+                View All
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 mt-10 place-items-center gap-5 ">
+              {interCard.map((items) => (
+                <div
+                  key={items.id}
+                  className="bg-[#111111] rounded-xl w-[320px] h-[550px] overflow-hidden"
+                >
+                  <div className="h-[200px] w-full overflow-hidden">
+                    <img
+                      src={items.picture}
+                      alt={items.title}
+                      className="h-full w-full object-cover transition-all duration-500 hover:scale-110"
+                    />
+                  </div>
+
+                  {/* Text Container */}
+                  <div className="p-5">
+                    <h2 className="text-white text-xl font-semibold">
+                      {items.title}
+                    </h2>
+
+                    <p className="text-gray-400 mt-3">{items.ans}</p>
+
+                    <div className="mt-2 text-[#FE4136] ">
+                      <button className="hover:underline underline-offset-4 cursor-pointer">
+                        {items.button}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Advanced */}
           <div className="mt-15 md:mt-20 ">
             <div className=" md:flex justify-between text-center">
               <span className="text-[#FE4136] px-20 py-4 md:px-4 md:py-4 bg-[#111111] text-2xl md:text-3xl rounded-2xl border border-white/10 font-semibold hover:border-[#FE4136] transition-all duration-500">
                 Level: <span className="text-white ">Advanced</span>
               </span>
-              <Link to='advDetail' className="mt-10 md:mt-0 border-2 border-white/10 px-6 h-[55px] rounded-xl hover:border-[#FE4136] transition-all duration-300 cursor-pointer flex justify-center items-center ">
-                    View All 
-                  </Link>
+              <Link
+                to="advDetail"
+                className="mt-10 md:mt-0 border-2 border-white/10 px-6 h-[55px] rounded-xl hover:border-[#FE4136] transition-all duration-300 cursor-pointer flex justify-center items-center "
+              >
+                View All
+              </Link>
             </div>
 
             <div>
               <div>
                 <div className="grid grid-cols-1 md:grid-cols-4 mt-10 place-items-center gap-5">
                   {advCard.map((items) => (
-                    <div key={items.id} className="bg-[#111111] rounded-xl w-[320px] h-[530px] overflow-hidden">
+                    <div
+                      key={items.id}
+                      className="bg-[#111111] rounded-xl w-[320px] h-[530px] overflow-hidden"
+                    >
                       <div className="h-[200px] w-full overflow-hidden">
                         <img
                           src={items.picture}
@@ -386,8 +599,6 @@ function LearningHub() {
                     </div>
                   ))}
                 </div>
-
-
               </div>
             </div>
           </div>
@@ -408,7 +619,10 @@ function LearningHub() {
               </p>
             </div>
 
-            <Link to='allVideos' className="mt-5 pl-35 py-3 flex border-2 border-white/10 md:px-6 md:py-3 rounded-xl hover:border-[#FE4136] transition-all duration-300 cursor-pointer">
+            <Link
+              to="allVideos"
+              className="mt-5 pl-35 py-3 flex border-2 border-white/10 md:px-6 md:py-3 rounded-xl hover:border-[#FE4136] transition-all duration-300 cursor-pointer"
+            >
               View All
             </Link>
           </div>
@@ -432,16 +646,18 @@ function LearningHub() {
                 </div>
 
                 <div className="p-7">
-                  <div className="flex justify-between">
-                    
-
-                  </div>
+                  <div className="flex justify-between"></div>
 
                   <h3 className="text-2xl font-semibold mt-5">{video.title}</h3>
 
                   <p className="text-gray-400 mt-3">Creator: {video.creator}</p>
 
-                  <a href={video.link} target="_blank" rel="noopener noreferrer" className="mt-6 text-[#FE4136] flex items-center gap-2 hover:gap-4 transition-all duration-300">
+                  <a
+                    href={video.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-6 text-[#FE4136] flex items-center gap-2 hover:gap-4 transition-all duration-300"
+                  >
                     Watch Video
                     <FaArrowRight />
                   </a>
@@ -450,28 +666,37 @@ function LearningHub() {
             ))}
           </div>
 
-          <div className='mt-10 md:mt-20 md:flex justify-between text-center space-y-10'>
-            <div className='w-fit h-fit p-10 rounded-4xl bg-[#18181A] border border-white/10 hover:border-[#FE4136] transition-all duration-500'> 
-            <div className="flex justify-center"><span className='text-white text-3xl font-semibold'>Go & Explore Our <span className='text-[#FE4136]'>Features</span> Page</span></div>
-          
-          <NavLink to='/features' className='flex justify-center mt-4 '>
-            <div className='w-fit h-fit flex gap-1 items-center bg-[#FE4136] py-3 px-6 rounded-3xl text-sm text-white cursor-pointer active:scale-90 transition-all duration-300 hover:-translate-y-1 hover:ease-in-out hover:shadow-[0px_0px_40px_#2F2F2F]'>Click To Explore<FiArrowRight/></div>
-            </NavLink>
-          </div>
-          
-          
-            <div className='w-fit h-fit p-10 rounded-4xl bg-[#18181A] border border-white/10 hover:border-[#FE4136] transition-all duration-500'> 
-            <div><span className='text-white text-3xl font-semibold'>Report a <span className='text-[#FE4136]'>Problem</span> You Are Facing</span></div>
-           
-          
-          <NavLink to='/contact' className='flex justify-center mt-4  '>
-            <div className='w-fit h-fit flex gap-1 items-center bg-[#FE4136] py-3 px-6 rounded-3xl text-sm text-white cursor-pointer active:scale-90 transition-all duration-300 hover:-translate-y-1 hover:ease-in-out hover:shadow-[0px_0px_40px_#2F2F2F]'>Click To Report <FiArrowRight/></div>
-            </NavLink>
-          </div>
-          
-          
-          
-          
+          <div className="mt-10 md:mt-20 md:flex justify-between text-center space-y-10">
+            <div className="w-fit h-fit p-10 rounded-4xl bg-[#18181A] border border-white/10 hover:border-[#FE4136] transition-all duration-500">
+              <div className="flex justify-center">
+                <span className="text-white text-3xl font-semibold">
+                  Go & Explore Our{" "}
+                  <span className="text-[#FE4136]">Features</span> Page
+                </span>
+              </div>
+
+              <NavLink to="/features" className="flex justify-center mt-4 ">
+                <div className="w-fit h-fit flex gap-1 items-center bg-[#FE4136] py-3 px-6 rounded-3xl text-sm text-white cursor-pointer active:scale-90 transition-all duration-300 hover:-translate-y-1 hover:ease-in-out hover:shadow-[0px_0px_40px_#2F2F2F]">
+                  Click To Explore
+                  <FiArrowRight />
+                </div>
+              </NavLink>
+            </div>
+
+            <div className="w-fit h-fit p-10 rounded-4xl bg-[#18181A] border border-white/10 hover:border-[#FE4136] transition-all duration-500">
+              <div>
+                <span className="text-white text-3xl font-semibold">
+                  Report a <span className="text-[#FE4136]">Problem</span> You
+                  Are Facing
+                </span>
+              </div>
+
+              <NavLink to="/contact" className="flex justify-center mt-4  ">
+                <div className="w-fit h-fit flex gap-1 items-center bg-[#FE4136] py-3 px-6 rounded-3xl text-sm text-white cursor-pointer active:scale-90 transition-all duration-300 hover:-translate-y-1 hover:ease-in-out hover:shadow-[0px_0px_40px_#2F2F2F]">
+                  Click To Report <FiArrowRight />
+                </div>
+              </NavLink>
+            </div>
           </div>
         </section>
       </div>

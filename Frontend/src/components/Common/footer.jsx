@@ -4,7 +4,6 @@ import { icon } from "../../assets/images";
 const Footer = () => {
   return (
     <footer className="bg-[#0b0f1a] text-gray-400 border-t border-white/20">
-
       <div
         className="
         max-w-7xl
@@ -21,31 +20,22 @@ const Footer = () => {
         md:px-10
         "
       >
-
         {/* Brand */}
         <div className="text-center sm:text-left">
           <div className="flex items-center justify-center sm:justify-start gap-2">
-            <img
-              className="h-8 w-8"
-              src={icon.logo}
-              alt="logo"
-            />
-            <h1 className="text-2xl font-bold text-white">
-              NEXORA
-            </h1>
+            <img className="h-8 w-8" src={icon.logo} alt="logo" />
+            <h1 className="text-2xl font-bold text-white">NEXORA</h1>
           </div>
 
           <p className="mt-5 text-sm leading-7 max-w-sm mx-auto sm:mx-0">
-            Built for precision in a volatile market.
-            Stay ahead with reliable crypto intelligence.
+            Built for precision in a volatile market. Stay ahead with reliable
+            crypto intelligence.
           </p>
         </div>
 
         {/* Company */}
         <div className="text-center sm:text-left">
-          <h2 className="text-white font-semibold mb-4">
-            Company
-          </h2>
+          <h2 className="text-white font-semibold mb-4">Company</h2>
 
           <ul className="space-y-3 text-sm">
             <li className="hover:text-white cursor-pointer transition-colors duration-300">
@@ -64,9 +54,7 @@ const Footer = () => {
 
         {/* Resources */}
         <div className="text-center sm:text-left">
-          <h2 className="text-white font-semibold mb-4">
-            Resources
-          </h2>
+          <h2 className="text-white font-semibold mb-4">Resources</h2>
 
           <ul className="space-y-3 text-sm">
             <li className="hover:text-white cursor-pointer transition-colors duration-300">
@@ -85,9 +73,7 @@ const Footer = () => {
 
         {/* Social */}
         <div className="text-center sm:text-left">
-          <h2 className="text-white font-semibold mb-4">
-            Connect
-          </h2>
+          <h2 className="text-white font-semibold mb-4">Connect</h2>
 
           <ul className="space-y-3 text-sm">
             <li className="hover:text-white cursor-pointer transition-colors duration-300">
@@ -103,7 +89,6 @@ const Footer = () => {
             </li>
           </ul>
         </div>
-
       </div>
 
       {/* Bottom */}
@@ -120,7 +105,6 @@ const Footer = () => {
       >
         © 2026 NEXORA. All rights reserved.
       </div>
-
     </footer>
   );
 };

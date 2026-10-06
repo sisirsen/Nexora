@@ -3,12 +3,12 @@ import { FiSearch, FiArrowRight } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
-import {icon} from '../../assets/images'
+import { icon } from "../../assets/images";
 
 function AdvDetail() {
   const [VisibleTopics, setVisibleTopics] = useState(10);
 
-  let defaultImage=icon.advimage
+  let defaultImage = icon.advimage;
 
   const advancedTopics = [
     {
@@ -269,7 +269,7 @@ function AdvDetail() {
         "Combine analysis, psychology, and risk management into a sustainable trading approach.",
     },
   ];
-  
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -323,7 +323,6 @@ function AdvDetail() {
 
         {/* Cards */}
 
-
         <div className="max-w-[1600px] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
           {advancedTopics.slice(0, VisibleTopics).map((topic) => (
             <div
@@ -333,7 +332,11 @@ function AdvDetail() {
               {/* Image */}
 
               <div className="h-52 bg-[#1f2937] flex items-center justify-center hover:scale-105 transition-all duration-500 overflow-hidden">
-                <img className="h-full w-full" src={defaultImage} alt={topic.title} />
+                <img
+                  className="h-full w-full"
+                  src={defaultImage}
+                  alt={topic.title}
+                />
               </div>
 
               {/* Content */}

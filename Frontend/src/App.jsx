@@ -11,7 +11,6 @@ import Markets from "./components/pages/Markets";
 import Login from "./components/auth/Login";
 import Signup from "./components/auth/Signup";
 import Terms from "./components/Subpages/Terms";
-import ScrollToTop from "./components/Buttons/ScrollToTop";
 import BeginnerDetail from "./components/DetailPages/BeginnerDetail";
 import IntermediateDetail from "./components/DetailPages/IntermediateDetail";
 import AdvDetail from "./components/DetailPages/AdvDetail";
@@ -19,22 +18,22 @@ import AllVideos from "./components/DetailPages/AllVideos";
 import CryptoNews from "./components/Subpages/CryptoNews";
 import CoinDetail from "./components/DetailPages/CoinDetail";
 import CryptoCalendar from "./components/Subpages/CryptoCalender";
-import Quiz from "./components/Subpages/Quiz";
+import Notes from "./components/Subpages/Notes";
 import Watchlist from "./components/Subpages/Watchlist";
 import Premium from "./components/pages/Premium";
+import { Toaster } from "react-hot-toast";
 function App() {
   return (
     <>
+      <Toaster position="top-right" reverseOrder={false} />
       <Navbar />
 
       <Routes>
-
-
         {/* Page Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<AboutUs />} />
-        <Route path="/premium" element={<Premium />}/>
+        <Route path="/premium" element={<Premium />} />
 
         {/* Learning Page Routes */}
         <Route path="/learn">
@@ -49,9 +48,9 @@ function App() {
         <Route path="/features">
           <Route index element={<Features />} />
           <Route path="cryptoNews" element={<CryptoNews />} />
-          <Route path="cryptocalender" element={<CryptoCalendar />}/>
-          <Route path="quiz" element={<Quiz />}/>
-          <Route path="watchlist" element={<Watchlist />}/>
+          <Route path="cryptocalender" element={<CryptoCalendar />} />
+          <Route path="notes" element={<Notes />} />
+          <Route path="watchlist" element={<Watchlist />} />
         </Route>
 
         {/* Market Page Routes */}
@@ -63,14 +62,11 @@ function App() {
         {/* Auth Routes */}
 
         <Route path="/login" element={<Login />} />
-        <Route path="/signup" >
-         <Route index element={<Signup />} />
-         <Route path="terms" element={<Terms />} />
-         </Route>
-       
+        <Route path="/signup">
+          <Route index element={<Signup />} />
+          <Route path="terms" element={<Terms />} />
+        </Route>
       </Routes>
-
-      <ScrollToTop />
 
       <Footer />
     </>

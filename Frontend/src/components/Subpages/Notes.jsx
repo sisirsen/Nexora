@@ -2,11 +2,10 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 
-
-function Quiz() {
-   useEffect(() => {
-      window.scrollTo(0, 0);
-    }, []);
+function Notes() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <motion.div
@@ -24,4 +23,4 @@ function Quiz() {
   );
 }
 
-export default Quiz;
+export default Notes;

@@ -3,11 +3,11 @@ import { FiSearch, FiArrowRight } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
-import {icon} from '../../assets/images'
+import { icon } from "../../assets/images";
 function IntermediateDetail() {
   const [VisibleTopics, setVisibleTopics] = useState(10);
 
-  let defaultimage= icon.intermediateimage
+  let defaultimage = icon.intermediateimage;
   const intermediateTopics = [
     {
       id: 1,
@@ -325,7 +325,11 @@ function IntermediateDetail() {
               {/* Image */}
 
               <div className="h-52 bg-[#1f2937] flex items-center justify-center hover:scale-105 transition-all duration-500 overflow-hidden">
-                <img className="h-full w-full" src={defaultimage} alt={topic.title} />
+                <img
+                  className="h-full w-full"
+                  src={defaultimage}
+                  alt={topic.title}
+                />
               </div>
 
               {/* Content */}
