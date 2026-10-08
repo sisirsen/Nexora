@@ -23,8 +23,8 @@ const Footer = () => {
         {/* Brand */}
         <div className="text-center sm:text-left">
           <div className="flex items-center justify-center sm:justify-start gap-2">
-            <img className="h-8 w-8" src={icon.logo} alt="logo" />
-            <h1 className="text-2xl font-bold text-white">NEXORA</h1>
+            <img className="h-7 w-7" src={icon.logo} alt="logo" />
+            <h1 className="text-2xl font-bold text-white">Nexora</h1>
           </div>
 
           <p className="mt-5 text-sm leading-7 max-w-sm mx-auto sm:mx-0">
@@ -103,7 +103,7 @@ const Footer = () => {
         sm:text-sm
         "
       >
-        © 2026 NEXORA. All rights reserved.
+        © 2026 Nexora. All rights reserved.
       </div>
     </footer>
   );

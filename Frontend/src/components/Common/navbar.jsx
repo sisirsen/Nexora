@@ -32,8 +32,8 @@ function Navbar() {
             to="/"
             className="flex items-center cursor-pointer text-white font-bold"
           >
-            <img className="h-6 w-6 md:h-8 md:w-8" src={icon.logo} alt="logo" />
-            <span className="pl-2 text-lg md:text-2xl">NEXORA</span>
+            <img className="h-6 w-6 md:h-7 md:w-7" src={icon.logo} alt="logo" />
+            <span className="pl-2 text-lg md:text-2xl">Nexora</span>
           </NavLink>
 
           {/* Desktop Navigation */}

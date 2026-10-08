@@ -73,7 +73,7 @@ function Signup() {
   });
 
   return (
-    <div className="min-h-[calc(100vh-88px)] mt-16 sm:mt-20 bg-black text-white flex items-center justify-center px-4 py-6 sm:py-10">
+    <div className="min-h-[calc(100vh-88px)] mt-16  bg-black text-white flex items-center justify-center px-4 py-6 sm:py-10">
 
       {/* ================= MAIN CARD ================= */}
 
